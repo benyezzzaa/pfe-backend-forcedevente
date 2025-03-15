@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Client } from '../client/client.entity';
 
+import { Visite } from '../Visite/visite.entity';
 @Entity({ name: 'users' }) // 🔥 Vérifie bien que la table s'appelle `users`
 export class User {
   @PrimaryGeneratedColumn()
@@ -22,4 +24,9 @@ export class User {
 
   @Column({ type: 'enum', enum: ['commercial', 'admin', 'bo'], default: 'commercial' })
   role: string;
+  @OneToMany(() => Client, (client) => client.commercial, { cascade: true })
+clients: Client[];
+  // ✅ Ajoute cette relation avec `Visite`
+  @OneToMany(() => Visite, (visite) => visite.user)
+  visites: Visite[];
 }

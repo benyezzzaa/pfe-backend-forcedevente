@@ -11,30 +11,31 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  /**
-   * 🔹 Connexion de l'utilisateur (Commercial, BO, Admin)
-   */
   async login(loginUserDto: LoginUserDto) {
     const user = await this.usersService.findByEmail(loginUserDto.email);
+    
     if (!user) {
+      console.log("❌ Utilisateur non trouvé !");
       throw new UnauthorizedException('Utilisateur non trouvé');
     }
-
-    // Vérifier si le mot de passe est correct
+  
+    console.log("✅ Utilisateur trouvé en base :", user);
+  
+    // 🔍 Vérification du mot de passe
     const passwordMatch = await bcrypt.compare(loginUserDto.password, user.password);
+  
     if (!passwordMatch) {
+      console.log("❌ Mot de passe incorrect !");
       throw new UnauthorizedException('Mot de passe incorrect');
     }
-
-    // Générer le token JWT
+  
+    console.log("✅ Mot de passe valide, génération du token...");
+  
     const payload = { id: user.id, email: user.email, role: user.role };
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
-    };
+    const token = this.jwtService.sign(payload);
+  
+    console.log("✅ Token généré :", token); // 🔥 Ajoute ça pour voir le token en console
+  
+    return { access_token: token };
   }
 }

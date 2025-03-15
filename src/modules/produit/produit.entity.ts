@@ -33,4 +33,5 @@ export class Produit {
   @ManyToOne(() => Unite, (unite) => unite.produits, { eager: true }) 
   @JoinColumn({ name: 'uniteId', referencedColumnName: 'nom' }) // ✅ Associer à `nom` au lieu de `id`
   unite: Unite;
+  
 }

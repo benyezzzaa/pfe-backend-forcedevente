@@ -39,4 +39,11 @@ export class ProduitService {
 
     return this.produitRepository.save(produit);
   }
+  
+  // ✅ 📌 Récupérer tous les produits avec leurs catégories et unités associées
+  async getAllProduits() {
+    return this.produitRepository.find({
+      relations: ['categorie', 'unite'], // 🔥 Charge les relations avec les catégories et les unités
+    });
+}
 }

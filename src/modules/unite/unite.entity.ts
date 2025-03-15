@@ -6,7 +6,7 @@ export class Unite {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true }) // ✅ Rendre `nom` unique pour éviter l'erreur de clé étrangère
+  @Column({ unique: true }) // ✅ Rendre `nom` unique
   nom: string;
 
   @OneToMany(() => Produit, (produit) => produit.unite)

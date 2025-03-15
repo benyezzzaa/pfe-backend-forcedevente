@@ -7,7 +7,11 @@ import { User } from './modules/users/users.entity';
 import { CategorieProduitModule } from './modules/categorie-produit/categorie-produit.module';
 import { UniteService } from './modules/unite/unite.service';
 import { UniteModule } from './modules/unite/unite.module';
+import { Client } from './modules/client/client.entity';
+import { ClientModule } from './modules/client/client.module';
+import { Unite } from './modules/unite/unite.entity';
 
+import { VisiteModule } from './modules/Visite/visite.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -19,14 +23,17 @@ import { UniteModule } from './modules/unite/unite.module';
       database: process.env.DATABASE_NAME || 'postgres',
       autoLoadEntities: true,
       synchronize: true,
-      entities: [User], // 🔥 Vérifie que `User` est bien importé ici
+      entities: [User,Client,Unite], // 🔥 Vérifie que `User` est bien importé ici
     }),
     UsersModule,
     AuthModule,
     ProduitModule,
     CategorieProduitModule,
-    UniteModule, // 🔥 Vérifie que c'est bien importé
+    UniteModule,
+    ClientModule,
+    UniteModule ,
+    VisiteModule,// 🔥 Vérifie que c'est bien importé
   ],
-  providers: [UniteService],
+  providers: [],
 })
 export class AppModule {}
