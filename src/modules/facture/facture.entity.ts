@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Commande } from '../commande/commande.entity';
 import { Reglement } from '../reglement/reglement.entity';
+import { ReglementFacture } from '../reglement-facture/reglement-facture.entity';
 
 
 @Entity({ name: 'facture' })
@@ -19,4 +20,6 @@ export class Facture {
 
   @OneToMany(() => Reglement, (reglement) => reglement.facture)
   reglements: Reglement[];
+  @OneToMany(() => ReglementFacture, (reglementFacture) => reglementFacture.facture)
+reglementsFactures: ReglementFacture[];
 }

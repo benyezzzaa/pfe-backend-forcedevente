@@ -7,9 +7,15 @@ import { Reglement } from '../reglement/reglement.entity';
 import { Facture } from '../facture/facture.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ReglementFacture, Reglement, Facture])], // ✅ Enregistre les repositories
-  controllers: [ReglementFactureController],
+  imports: [
+    TypeOrmModule.forFeature([
+      ReglementFacture,  // ✅ Tu injectes le Repository de ReglementFacture
+      Reglement,          // ✅ Tu injectes aussi le Repository de Reglement
+      Facture,            // ✅ Tu injectes aussi le Repository de Facture
+    ])
+  ],
   providers: [ReglementFactureService],
-  exports: [ReglementFactureService, TypeOrmModule], // ✅ Exporte bien TypeOrmModule
+  controllers: [ReglementFactureController],
+  exports: [ReglementFactureService], // 🔥 Important si tu veux utiliser ailleurs
 })
 export class ReglementFactureModule {}

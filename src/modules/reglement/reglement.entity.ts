@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Facture } from '../facture/facture.entity';
 import { TypeReglement } from '../type-reglement/typeReglement.entity';
+import { ReglementFacture } from '../reglement-facture/reglement-facture.entity';
 
 @Entity({ name: 'reglement' })
 export class Reglement {
@@ -23,4 +24,6 @@ export class Reglement {
   @ManyToOne(() => TypeReglement, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'type_reglement_id' })
   typeReglement?: TypeReglement; // ✅ Accept `null`
+  @OneToMany(() => ReglementFacture, (reglementFacture) => reglementFacture.reglement)
+reglementsFactures: ReglementFacture[];
 }

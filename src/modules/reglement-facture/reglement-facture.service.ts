@@ -2,23 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ReglementFacture } from './reglement-facture.entity';
-import { Reglement } from '../reglement/reglement.entity';
-import { Facture } from '../facture/facture.entity';
 
 @Injectable()
 export class ReglementFactureService {
   constructor(
     @InjectRepository(ReglementFacture)
-    private readonly reglementFactureRepository: Repository<ReglementFacture>, // ✅ Assure l'injection correcte
-
-    @InjectRepository(Reglement)
-    private readonly reglementRepository: Repository<Reglement>,
-
-    @InjectRepository(Facture)
-    private readonly factureRepository: Repository<Facture>,
+    private readonly reglementFactureRepository: Repository<ReglementFacture>,
   ) {}
 
-  async listerReglementsFactures(): Promise<ReglementFacture[]> {
-    return this.reglementFactureRepository.find({ relations: ['facture', 'reglement'] });
+  // 🔥 Récupérer toutes les bandes de commande
+  async findAll(): Promise<ReglementFacture[]> {
+    return this.reglementFactureRepository.find({
+      relations: ['reglement', 'facture'],
+    });
   }
 }

@@ -24,6 +24,7 @@ import { TypeReglementModule } from './modules/type-reglement/type-reglement.mod
 import { ReglementFactureModule } from './modules/reglement-facture/reglement-facture.module';
 import { TypeReglement } from './modules/type-reglement/typeReglement.entity';
 import { FactureModule } from './modules/facture/facture.module';
+import { ReglementFacture } from './modules/reglement-facture/reglement-facture.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -35,7 +36,7 @@ import { FactureModule } from './modules/facture/facture.module';
       database: process.env.DATABASE_NAME || 'postgres',
       autoLoadEntities: true,
       synchronize: true, // ⚠️ Mettre `false` en production et utiliser des migrations
-      entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, Unite], // ✅ Ajout de `Facture` et `Reglement`
+      entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, Unite,ReglementFacture], // ✅ Ajout de `Facture` et `Reglement`
     }),
     UsersModule,
     AuthModule,

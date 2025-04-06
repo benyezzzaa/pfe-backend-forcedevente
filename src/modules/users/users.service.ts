@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './users.entity';
@@ -17,27 +17,29 @@ export class UsersService {
     const existingUser = await this.userRepository.findOne({
       where: { email: createUserDto.email },
     });
-
+  
     if (existingUser) {
-      throw new Error('Email déjà utilisé');
+      throw new BadRequestException('Email déjà utilisé');
     }
-
+  
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
-
+  
     const commercial = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
-      role: 'commercial', // 🔥 On force "commercial"
+      role: 'commercial', // Force le rôle
     });
-
+  
     return this.userRepository.save(commercial);
   }
+  
 
   // ✅ Récupérer tous les commerciaux
   async findAllCommerciaux(): Promise<User[]> {
     return this.userRepository.find({
       where: { role: 'commercial' },
+      relations: ['visites'], // 🔥 On ajoute ça pour charger les visites du commercial
     });
   }
 
