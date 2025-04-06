@@ -8,7 +8,12 @@ import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  // ✅ Autoriser les requêtes CORS depuis le frontend
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS','PATCH'],
+    credentials: true,
+  });
   // 🔥 Activer la validation des DTOs
   app.useGlobalPipes(new ValidationPipe());
 
@@ -28,8 +33,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-
-  await app.listen(3000);
-  console.log('🚀 Swagger est disponible sur http://localhost:3000/api');
+  app.enableCors(); // 👈 Obligatoire si frontend ≠ backend
+  await app.listen(4000);
+  console.log('🚀 Swagger est disponible sur http://localhost:4000/api');
 }
 bootstrap();

@@ -46,4 +46,15 @@ export class ProduitService {
       relations: ['categorie', 'unite'], // 🔥 Charge les relations avec les catégories et les unités
     });
 }
+async updateStatut(id: number, isActive: boolean) {
+  const produit = await this.produitRepository.findOneBy({ id });
+
+  if (!produit) {
+    throw new NotFoundException('Produit introuvable');
+  }
+
+  produit.isActive = isActive;
+
+  return this.produitRepository.save(produit);
+}
 }

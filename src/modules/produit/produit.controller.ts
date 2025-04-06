@@ -1,4 +1,4 @@
-import { Controller, Post, Body,Get, UploadedFiles, UseInterceptors, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body,Get, UploadedFiles, UseInterceptors, UseGuards, Patch, Param } from '@nestjs/common';
 import { ProduitService } from './produit.service';
 import { CreateProduitDto } from './dto/create-produit.dto';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
@@ -66,4 +66,15 @@ export class ProduitController {
   findAllUnites() {
     return this.uniteService.findAll();
   }
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard)
+  @SetRoles('admin') // Seul l’admin peut changer le statut
+  @ApiOperation({ summary: "Activer/Désactiver un produit" })
+  async updateStatutProduit(
+    @Param('id') id: string,
+    @Body('isActive') isActive: boolean
+  ) {
+    return this.produitService.updateStatut(Number(id), isActive);
+  }
+  
 }

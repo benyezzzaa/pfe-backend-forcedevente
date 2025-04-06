@@ -12,6 +12,18 @@ import { ClientModule } from './modules/client/client.module';
 import { Unite } from './modules/unite/unite.entity';
 
 import { VisiteModule } from './modules/Visite/visite.module';
+import { LigneCommande } from './modules/lignecommande/lignecommande.entity';
+import { CommandeModule } from './modules/commande/commande.module';
+import { LigneCommandeModule } from './modules/lignecommande/lignecommande.module';
+
+import { Commande } from './modules/commande/commande.entity';
+import { Facture } from './modules/facture/facture.entity'; // ✅ Ajout de l'entité Facture
+import { Reglement } from './modules/reglement/reglement.entity'; // ✅ Ajout de l'entité Reglement
+import { ReglementModule } from './modules/reglement/reglement.module';
+import { TypeReglementModule } from './modules/type-reglement/type-reglement.module';
+import { ReglementFactureModule } from './modules/reglement-facture/reglement-facture.module';
+import { TypeReglement } from './modules/type-reglement/typeReglement.entity';
+import { FactureModule } from './modules/facture/facture.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -22,8 +34,8 @@ import { VisiteModule } from './modules/Visite/visite.module';
       password: process.env.DATABASE_PASSWORD || 'fatma',
       database: process.env.DATABASE_NAME || 'postgres',
       autoLoadEntities: true,
-      synchronize: true,
-      entities: [User,Client,Unite], // 🔥 Vérifie que `User` est bien importé ici
+      synchronize: true, // ⚠️ Mettre `false` en production et utiliser des migrations
+      entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, Unite], // ✅ Ajout de `Facture` et `Reglement`
     }),
     UsersModule,
     AuthModule,
@@ -31,8 +43,14 @@ import { VisiteModule } from './modules/Visite/visite.module';
     CategorieProduitModule,
     UniteModule,
     ClientModule,
-    UniteModule ,
-    VisiteModule,// 🔥 Vérifie que c'est bien importé
+    UniteModule,
+    VisiteModule,
+    LigneCommandeModule,
+    CommandeModule,
+    ReglementModule,
+    TypeReglementModule,
+    ReglementFactureModule,
+    FactureModule,
   ],
   providers: [],
 })

@@ -5,7 +5,8 @@ import { Unite } from '../unite/unite.entity';
 export class Produit {
   @PrimaryGeneratedColumn()
   id: number;
-
+  @Column({ default: true })
+isActive: boolean;
   @Column({ nullable: false })
   nom: string;
 
