@@ -1,19 +1,34 @@
-import { Controller, Post, Body } from '@nestjs/common';
- // ✅ Correction de l'import
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { ReglementFactureService } from './facture.service';
+import { Controller, Get, Post, Body, Param, Delete, NotFoundException } from '@nestjs/common';
+import { FactureService } from './facture.service';
+import { Facture } from './facture.entity';
+import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Règlement-Factures') // ✅ Ajout pour Swagger
-@ApiBearerAuth() // ✅ Ajout de l'authentification si nécessaire
-@Controller('reglementfactures')
-export class ReglementFactureController {
-  constructor(private readonly reglementFactureService: ReglementFactureService) {}
+@ApiTags('Factures')
+@Controller('factures')
+export class FactureController {
+  constructor(private readonly factureService: FactureService) {}
+
+  @Get()
+  async getAllFactures(): Promise<Facture[]> {
+    return this.factureService.findAll();
+  }
+
+  @Get(':id')
+  async getOne(@Param('id') id: number): Promise<Facture> {
+    const facture = await this.factureService.findById(id);
+    if (!facture) {
+      throw new NotFoundException('Facture non trouvée');
+    }
+    return facture;
+  }
 
   @Post()
-  @ApiOperation({ summary: 'Associer un règlement à une facture' }) // ✅ Swagger
-  async linkReglementToFacture(
-    @Body() dto: { reglementId: number; factureId: number }
-  ) {
-    return this.reglementFactureService.linkReglementToFacture(dto.reglementId, dto.factureId);
+  async createFacture(@Body() factureData: Partial<Facture>): Promise<Facture> {
+    return this.factureService.create(factureData);
+  }
+
+  @Delete(':id')
+  async deleteFacture(@Param('id') id: number): Promise<void> {
+    return this.factureService.delete(id);
   }
 }

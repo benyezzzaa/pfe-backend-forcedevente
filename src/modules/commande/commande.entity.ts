@@ -23,9 +23,12 @@ export class Commande {
   @ManyToOne(() => User, (user) => user.commandes, { onDelete: 'SET NULL' })
   commercial: User;
 
-  @OneToMany(() => LigneCommande, (ligneCommande) => ligneCommande.commande)
+  @OneToMany(() => LigneCommande, (ligneCommande) => ligneCommande.commande, { cascade: true })
   lignesCommande: LigneCommande[];
   // 🚀 Ajout de la relation avec Facture
   @OneToMany(() => Facture, (facture) => facture.commande, { cascade: true })
   factures: Facture[];
+  @Column({ default: 'en_attente' })
+statut: string;
+
 }

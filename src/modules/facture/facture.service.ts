@@ -1,31 +1,29 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
-import { Reglement } from '../reglement/reglement.entity';
-import { Facture } from '../facture/facture.entity';
-import { ReglementFacture } from '../reglement-facture/reglement-facture.entity';
+import { Facture } from './facture.entity';
 
 @Injectable()
-export class ReglementFactureService {
+export class FactureService {
   constructor(
-    @InjectRepository(ReglementFacture)
-    private reglementFactureRepository: Repository<ReglementFacture>,
-
-    @InjectRepository(Reglement)
-    private reglementRepository: Repository<Reglement>,
-
     @InjectRepository(Facture)
-    private factureRepository: Repository<Facture>,
+    private readonly factureRepository: Repository<Facture>,
   ) {}
 
-  async linkReglementToFacture(reglementId: number, factureId: number): Promise<ReglementFacture> {
-    const reglement = await this.reglementRepository.findOne({ where: { id: reglementId } });
-    const facture = await this.factureRepository.findOne({ where: { id: factureId } });
+  async findAll(): Promise<Facture[]> {
+    return await this.factureRepository.find();
+  }
 
-    if (!reglement || !facture) throw new NotFoundException('Règlement ou Facture non trouvé.');
+  async findById(id: number): Promise<Facture | null> {  // <-- CORRIGÉ ici
+    return await this.factureRepository.findOneBy({ id });
+  }
 
-    const reglementFacture = this.reglementFactureRepository.create({ reglement, facture });
-    return await this.reglementFactureRepository.save(reglementFacture);
+  async create(factureData: Partial<Facture>): Promise<Facture> {
+    const newFacture = this.factureRepository.create(factureData);
+    return await this.factureRepository.save(newFacture);
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.factureRepository.delete(id);
   }
 }

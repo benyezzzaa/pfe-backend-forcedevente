@@ -1,29 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsDateString, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsDateString, IsOptional } from 'class-validator';
 
 export class CreateReglementDto {
-  @ApiProperty({ example: 1, description: 'ID de la facture associée' })
+  @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
-  factureId: number;
+  montant: number;
 
-  @ApiProperty({ example: 250.50, description: 'Montant payé' })
+  @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
   montantPaye: number;
 
-  @ApiProperty({ example: '2025-03-18', description: 'Date du paiement' })
-  @IsDateString()
-  @IsNotEmpty()
-  datePaiement: string;
-
-  @ApiProperty({ example: 'Payé', description: 'Statut du règlement' })
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty()
+  mode_paiement: string;
+
+  @ApiProperty()
+  @IsDateString()
+  datePaiement: string; // format ISO: "2024-04-08"
+
+  @ApiProperty()
+  @IsString()
   statut: string;
 
-  @ApiProperty({ example: 1, description: 'ID du type de règlement (optionnel)' })
-  @IsNumber()
+  @ApiProperty({ required: false })
   @IsOptional()
   typeReglementId?: number;
 }

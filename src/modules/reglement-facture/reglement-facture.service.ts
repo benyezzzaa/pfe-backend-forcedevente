@@ -10,7 +10,6 @@ export class ReglementFactureService {
     private readonly reglementFactureRepository: Repository<ReglementFacture>,
   ) {}
 
-  // 🔥 Récupérer toutes les bandes de commande
   async findAll(): Promise<ReglementFacture[]> {
     return this.reglementFactureRepository.find({
       relations: ['reglement', 'facture'],

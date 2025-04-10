@@ -25,6 +25,7 @@ import { ReglementFactureModule } from './modules/reglement-facture/reglement-fa
 import { TypeReglement } from './modules/type-reglement/typeReglement.entity';
 import { FactureModule } from './modules/facture/facture.module';
 import { ReglementFacture } from './modules/reglement-facture/reglement-facture.entity';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -52,6 +53,7 @@ import { ReglementFacture } from './modules/reglement-facture/reglement-facture.
     TypeReglementModule,
     ReglementFactureModule,
     FactureModule,
+    DashboardModule,
   ],
   providers: [],
 })

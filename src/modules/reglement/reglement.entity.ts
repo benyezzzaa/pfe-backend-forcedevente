@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { Facture } from '../facture/facture.entity';
+// src/modules/reglement/reglement.entity.ts
+
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { TypeReglement } from '../type-reglement/typeReglement.entity';
 import { ReglementFacture } from '../reglement-facture/reglement-facture.entity';
 
@@ -8,22 +9,25 @@ export class Reglement {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'montant_paye', type: 'double precision', nullable: false })
-  montantPaye: number;
+  @Column()
+  mode_paiement: string;  // 🛠️ Méthode de paiement (ex: carte, espèce...)
 
-  @Column({ name: 'date_paiement', type: 'date', nullable: false })
-  datePaiement: Date;
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  montant: number;        // 🛠️ Montant réglé
 
-  @Column({ type: 'varchar', length: 50, nullable: false })
-  statut: string;
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  montantPaye: number;     // 🛠️ Montant déjà payé
 
-  @ManyToOne(() => Facture, (facture) => facture.reglements, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'facture_id' })
-  facture: Facture;
+  @Column({ type: 'date', nullable: true })
+  datePaiement: Date;      // 🛠️ Date du paiement
 
-  @ManyToOne(() => TypeReglement, { nullable: true, onDelete: 'SET NULL' })
+  @Column({ nullable: true })
+  statut: string;          // 🛠️ (ex: payé, en attente...)
+
+  @ManyToOne(() => TypeReglement, (typeReglement) => typeReglement.reglements, { nullable: true })
   @JoinColumn({ name: 'type_reglement_id' })
-  typeReglement?: TypeReglement; // ✅ Accept `null`
+  typeReglement: TypeReglement; // 🛠️ Type de règlement (ex: Acompte, Solde...)
+
   @OneToMany(() => ReglementFacture, (reglementFacture) => reglementFacture.reglement)
-reglementsFactures: ReglementFacture[];
+  reglementsFactures: ReglementFacture[];
 }

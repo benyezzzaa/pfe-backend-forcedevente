@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { CategorieProduit } from '../categorie-produit/categorie-produit.entity';
 import { Unite } from '../unite/unite.entity';
+import { LigneCommande } from '../lignecommande/lignecommande.entity';
 @Entity({ name: 'produit' })
 export class Produit {
   @PrimaryGeneratedColumn()
@@ -22,6 +23,9 @@ isActive: boolean;
   @Column("text", { array: true, nullable: true })
   images: string[];
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+prix_unitaire: number;
+
   @Column({ type: 'varchar', nullable: false }) // ✅ Vérifie que c'est bien NOT NULL
   categorieId: string;
 
@@ -34,5 +38,6 @@ isActive: boolean;
   @ManyToOne(() => Unite, (unite) => unite.produits, { eager: true }) 
   @JoinColumn({ name: 'uniteId', referencedColumnName: 'nom' }) // ✅ Associer à `nom` au lieu de `id`
   unite: Unite;
-  
+  @OneToMany(() => LigneCommande, (ligneCommande) => ligneCommande.produit)
+  lignesCommande: LigneCommande[]; // ✅ Ajoute ceci pour corriger ton erreur aussi
 }
