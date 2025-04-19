@@ -15,7 +15,10 @@ async function bootstrap() {
     credentials: true,
   });
   // 🔥 Activer la validation des DTOs
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes( new ValidationPipe({
+    whitelist: true,
+    transform: true, // Très important pour DTOs (sinon le body est vide)
+  }));
 
   // ✅ Appliquer le `JwtAuthGuard` globalement, mais attention à Swagger
 

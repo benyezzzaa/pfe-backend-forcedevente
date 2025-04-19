@@ -1,23 +1,36 @@
-import { ApiProperty } from '@nestjs/swagger';
+// ✅ DTO - create-produit.dto.ts
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateProduitDto {
-  @ApiProperty({ example: 'Oeufs Bio', description: 'Nom du produit' })
+  @IsNotEmpty()
+  @IsString()
   nom: string;
 
-  @ApiProperty({ example: 'Oeufs frais biologiques', description: 'Description du produit' })
+  @IsNotEmpty()
+  @IsString()
   description: string;
 
-  @ApiProperty({ example: 10.99, description: 'Prix du produit' })
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
   prix: number;
 
-  @ApiProperty({ example: 100, description: 'Quantité en stock' })
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
   stock: number;
 
-  @ApiProperty({ example: 'Produits Laitiers', description: 'Nom de la catégorie' })
-  categorieId: string; // 🔥 Stocke le nom de la catégorie
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  prix_unitaire: number;
 
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, required: false }) // 📂 Pour Swagger
-  images?: string[];
-  @ApiProperty({ example: 'Plastique', description: 'Nom de l\'unité' }) // ✅ `uniteId` devient un `string`
-  uniteId: string;
+  @IsNotEmpty()
+  @IsString()
+  categorieId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  uniteId: string; // ⚠️ string car c'est le nom de l'unité
 }

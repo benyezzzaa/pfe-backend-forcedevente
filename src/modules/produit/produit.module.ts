@@ -13,4 +13,4 @@ import { UniteService } from '../unite/unite.service';
   controllers: [ProduitController],
   exports: [ProduitService], // 🔥 Assurez-vous que le service est bien exporté
 })
-export class ProduitModule {}
+export class ProduitModule {} 

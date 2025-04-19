@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Produit } from './produit.entity';
 import { CreateProduitDto } from './dto/create-produit.dto';
 import { CategorieProduit } from '../categorie-produit/categorie-produit.entity';
 import { Unite } from '../unite/unite.entity';
+
 @Injectable()
 export class ProduitService {
   constructor(
@@ -13,48 +14,67 @@ export class ProduitService {
 
     @InjectRepository(CategorieProduit)
     private categorieProduitRepository: Repository<CategorieProduit>,
+    
     @InjectRepository(Unite)
     private uniteRepository: Repository<Unite>,
   ) {}
 
   async createProduit(dto: CreateProduitDto, imageFilenames?: string[]) {
-    let categorie = await this.categorieProduitRepository.findOne({
-      where: { nom: dto.categorieId },
-    });
-
-    if (!categorie) {
-      categorie = this.categorieProduitRepository.create({ nom: dto.categorieId });
-      await this.categorieProduitRepository.save(categorie);
+    if (!dto.uniteId || !dto.categorieId) {
+      throw new BadRequestException('Les champs uniteId et categorieId sont requis.');
     }
- // 🔹 Vérifier si l’unité existe
- const unite = await this.uniteRepository.findOne({ where: { nom: dto.uniteId } });
- if (!unite) {
-   throw new NotFoundException(`Unité ID ${dto.uniteId} non trouvée`);
- }
+
+    // 🔎 Trouver l’unité par nom (non sensible à la casse)
+    const unite = await this.uniteRepository
+      .createQueryBuilder('unite')
+      .where('LOWER(unite.nom) = LOWER(:nom)', { nom: dto.uniteId })
+      .getOne();
+
+    if (!unite) {
+      throw new NotFoundException(`Unité "${dto.uniteId}" non trouvée.`);
+    }
+
+    // 🔎 Trouver la catégorie par nom
+    const categorie = await this.categorieProduitRepository.findOneBy({ nom: dto.categorieId });
+    if (!categorie) {
+      throw new NotFoundException(`Catégorie "${dto.categorieId}" non trouvée.`);
+    }
+
+    // ✅ Créer le produit
     const produit = this.produitRepository.create({
-      ...dto,
+      nom: dto.nom,
+      description: dto.description,
+      prix: dto.prix,
+      stock: dto.stock,
+      prix_unitaire: dto.prix_unitaire,
       images: imageFilenames ?? [],
-      unite, // 🔥 Stocker les images sous forme de tableau
+      uniteId: unite.nom,
+      categorieId: categorie.id,
     });
 
     return this.produitRepository.save(produit);
   }
-  
-  // ✅ 📌 Récupérer tous les produits avec leurs catégories et unités associées
+
   async getAllProduits() {
     return this.produitRepository.find({
-      relations: ['categorie', 'unite'], // 🔥 Charge les relations avec les catégories et les unités
+      relations: ['categorie', 'unite'],
     });
-}
-async updateStatut(id: number, isActive: boolean) {
-  const produit = await this.produitRepository.findOneBy({ id });
-
-  if (!produit) {
-    throw new NotFoundException('Produit introuvable');
   }
 
-  produit.isActive = isActive;
+  async updateStatut(id: number, isActive: boolean) {
+    const produit = await this.produitRepository.findOneBy({ id });
 
-  return this.produitRepository.save(produit);
-}
+    if (!produit) {
+      throw new NotFoundException('Produit introuvable');
+    }
+
+    await this.produitRepository
+      .createQueryBuilder()
+      .update(Produit)
+      .set({ isActive: isActive })
+      .where("id = :id", { id })
+      .execute();
+
+    return { message: `Produit ${isActive ? 'activé' : 'désactivé'} ✅` };
+  }
 }

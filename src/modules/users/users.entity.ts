@@ -33,4 +33,8 @@ clients: Client[];
    // ✅ Ajout de la relation avec `Commande`
    @OneToMany(() => Commande, (commande) => commande.commercial)
    commandes: Commande[];
+   @Column({ default: true })
+isActive: boolean;
+
+
 }

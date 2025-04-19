@@ -1,3 +1,4 @@
+// ✅ categorie-produit.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CategorieProduit } from './categorie-produit.entity';

@@ -26,6 +26,10 @@ import { TypeReglement } from './modules/type-reglement/typeReglement.entity';
 import { FactureModule } from './modules/facture/facture.module';
 import { ReglementFacture } from './modules/reglement-facture/reglement-facture.entity';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { RaisonVisite } from './modules/raison-visite/raison-visite.entity';
+import { RaisonVisiteModule } from './modules/raison-visite/raison-visite.module';
+import { ObjectifCommercialModule } from './modules/ObjectifCommercial/objectif-commercial.module';
+import { PromotionModule } from './modules/Promotion/promotion.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -37,7 +41,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
       database: process.env.DATABASE_NAME || 'postgres',
       autoLoadEntities: true,
       synchronize: true, // ⚠️ Mettre `false` en production et utiliser des migrations
-      entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, Unite,ReglementFacture], // ✅ Ajout de `Facture` et `Reglement`
+      entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, Unite,ReglementFacture,RaisonVisiteModule,ObjectifCommercialModule,PromotionModule], // ✅ Ajout de `Facture` et `Reglement`
     }),
     UsersModule,
     AuthModule,
@@ -54,6 +58,10 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     ReglementFactureModule,
     FactureModule,
     DashboardModule,
+    RaisonVisiteModule,
+    ObjectifCommercialModule,
+    PromotionModule,
+
   ],
   providers: [],
 })

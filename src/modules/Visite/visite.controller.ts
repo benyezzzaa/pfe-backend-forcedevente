@@ -5,6 +5,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { SetRoles } from '../auth/setRoles.decorator';
+import { Visite } from './visite.entity';
 
 @ApiTags('Visites')
 @ApiBearerAuth()
@@ -39,5 +40,9 @@ export class VisiteController {
   @ApiOperation({ summary: 'Supprimer une visite (Admin ou propriétaire)' })
   async deleteVisite(@Param('id') id: number, @Request() req) {
     return this.visiteService.deleteVisite(id, req.user);
+  }
+  @Get('all')
+  findAll(): Promise<Visite[]> {
+    return this.visiteService.getAllVisites();
   }
 }

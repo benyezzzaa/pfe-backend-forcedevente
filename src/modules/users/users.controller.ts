@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Delete, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Query,
+  UseGuards
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
@@ -21,26 +30,24 @@ export class UsersController {
     return this.usersService.createCommercial(createUserDto);
   }
 
-  // ✅ Lister tous les commerciaux
-  @Get('commerciaux')
-  @SetRoles('admin')
-  @ApiOperation({ summary: 'Lister les commerciaux' })
-  findAllCommerciaux() {
-    return this.usersService.findAllCommerciaux();
-  }
-
-  // ✅ Supprimer un utilisateur (commercial ou autre)
-  @Delete(':id')
-  @SetRoles('admin')
-  @ApiOperation({ summary: 'Supprimer un utilisateur' })
-  deleteUser(@Param('id') id: number) {
-    return this.usersService.deleteUser(id);
-  }
-
-  // ✅ Voir tous les utilisateurs (optionnel si nécessaire)
+  // ✅ Obtenir tous les utilisateurs (avec filtre optionnel par rôle)
   @Get()
   @SetRoles('admin')
-  findAll() {
-    return this.usersService.findAll();
+  @ApiOperation({ summary: 'Lister les utilisateurs avec filtre par rôle' })
+  findUsers(@Query('role') role?: string) {
+    return this.usersService.findByRole(role);
   }
+
+  // ✅ Activer/Désactiver un utilisateur
+  @Patch(':id/status')
+  @SetRoles('admin')
+  @ApiOperation({ summary: 'Activer ou désactiver un utilisateur' })
+  toggleUserStatus(@Param('id') id: number, @Body() body: { isActive: boolean }) {
+    return this.usersService.updateStatus(id, body.isActive);
+  }
+  @Post('create-admin')
+@SetRoles('admin')
+createAdmin(@Body() createUserDto: CreateUserDto) {
+  return this.usersService.createAdmin(createUserDto);
+}
 }

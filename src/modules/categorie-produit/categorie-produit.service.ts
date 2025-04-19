@@ -1,3 +1,4 @@
+// ✅ categorie-produit.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,36 +9,32 @@ import { CreateCategorieDto } from './dto/create-categorie.dto';
 export class CategorieProduitService {
   constructor(
     @InjectRepository(CategorieProduit)
-    private categorieProduitRepository: Repository<CategorieProduit>,
+    private readonly categorieRepository: Repository<CategorieProduit>
   ) {}
 
-  async createCategorie(dto: CreateCategorieDto): Promise<CategorieProduit> {
-    const nouvelleCategorie = this.categorieProduitRepository.create(dto);
-    return this.categorieProduitRepository.save(nouvelleCategorie);
+  async create(dto: CreateCategorieDto): Promise<CategorieProduit> {
+    const cat = this.categorieRepository.create(dto);
+    return this.categorieRepository.save(cat);
   }
 
-  async getAllCategories(): Promise<CategorieProduit[]> {
-    return this.categorieProduitRepository.find({ relations: ['produits'] });
+  async getAll(): Promise<CategorieProduit[]> {
+    return this.categorieRepository.find();
   }
 
-  async getCategorieById(id: number): Promise<CategorieProduit> {
-    const categorie = await this.categorieProduitRepository.findOne({ where: { id }, relations: ['produits'] });
-    if (!categorie) {
-      throw new NotFoundException('Catégorie non trouvée');
-    }
-    return categorie;
+  async getById(id: number): Promise<CategorieProduit> {
+    const cat = await this.categorieRepository.findOneBy({ id });
+    if (!cat) throw new NotFoundException('Catégorie introuvable');
+    return cat;
   }
 
-  async updateCategorie(id: number, dto: CreateCategorieDto): Promise<CategorieProduit> {
-    const categorie = await this.getCategorieById(id);
-    Object.assign(categorie, dto);
-    return this.categorieProduitRepository.save(categorie);
+  async update(id: number, dto: CreateCategorieDto): Promise<CategorieProduit> {
+    const cat = await this.getById(id);
+    Object.assign(cat, dto);
+    return this.categorieRepository.save(cat);
   }
 
-  async deleteCategorie(id: number): Promise<void> {
-    const result = await this.categorieProduitRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException('Catégorie non trouvée');
-    }
+  async delete(id: number): Promise<void> {
+    const result = await this.categorieRepository.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Catégorie introuvable');
   }
 }

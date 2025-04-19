@@ -1,3 +1,4 @@
+// ✅ categorie-produit.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Produit } from '../produit/produit.entity';
@@ -5,11 +6,12 @@ import { Produit } from '../produit/produit.entity';
 @Entity({ name: 'categorie_produit' })
 export class CategorieProduit {
   @PrimaryGeneratedColumn()
-  @ApiProperty({ example: 1, description: 'ID unique de la catégorie' })
+  @ApiProperty({ example: 1 })
   id: number;
 
-  @Column({ unique: true, nullable: false })
-  @ApiProperty({ example: 'Boissons', description: 'Nom de la catégorie de produit' })
+  
+  @Column({ type: 'varchar', nullable: false, unique: true })
+  @ApiProperty({ example: 'Boissons' })
   nom: string;
 
   @OneToMany(() => Produit, (produit) => produit.categorie)

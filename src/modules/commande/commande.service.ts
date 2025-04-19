@@ -25,6 +25,8 @@ export class CommandeService {
     if (commercial.role !== 'commercial') {
       throw new ForbiddenException('Seuls les commerciaux peuvent créer des commandes.');
     }
+    console.log('DTO reçu:', dto);
+
 
     let prixHorsTaxeTotal = 0;
 

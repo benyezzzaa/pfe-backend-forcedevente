@@ -15,9 +15,10 @@ export class CommandeController {
   constructor(private readonly commandeService: CommandeService) {}
 
   @Post()
-  @SetRoles('commercial')
-  @ApiOperation({ summary: 'Créer une commande' })
   async createCommande(@Body() dto: CreateCommandeDto, @Request() req) {
+    console.log('📦 RAW DTO:', dto);
+    console.log('🔍 TYPEOF:', typeof dto, dto.constructor?.name);
+    console.log('🔍 numeroCommande:', dto.numeroCommande);
     return this.commandeService.createCommande(dto, req.user);
   }
   @Get('validees')

@@ -14,12 +14,17 @@ export class UniteController {
   create(@Body() dto: CreateUniteDto) {
     return this.uniteService.create(dto);
   }
+  @Get('unites')
+@ApiOperation({ summary: 'Lister toutes les unités (alias)' })
+getAllUnites() {
+  return this.uniteService.findAll();
+}
 
   @Get()
-  @ApiOperation({ summary: 'Obtenir toutes les unités' })
-  findAll() {
-    return this.uniteService.findAll();
-  }
+  @ApiOperation({ summary: 'Lister toutes les unités (depuis produit)' })
+findAllUnitesFromProduit() {
+  return this.uniteService.findAll();
+}
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtenir une unité par ID' })

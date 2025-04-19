@@ -1,6 +1,10 @@
+// ✅ create-categorie.dto.ts
+import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCategorieDto {
-  @ApiProperty({ example: 'Boissons', description: 'Nom de la catégorie de produit' })
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ example: 'Boissons' })
   nom: string;
 }

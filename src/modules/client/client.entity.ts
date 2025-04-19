@@ -28,4 +28,6 @@ export class Client {
   })
   @JoinColumn({ name: 'commercial_id' }) // 👈 Dis à TypeORM que la clé est "commercial_id"
   commercial: User;
+  @Column({ default: true })
+isActive: boolean;
 }

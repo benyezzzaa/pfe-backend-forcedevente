@@ -12,50 +12,74 @@ export class ClientService {
     private clientRepository: Repository<Client>,
   ) {}
 
-  // ✅ Ajouter un client
-  async createClient(dto: CreateClientDto, commercial: User): Promise<Client> {
-    if (commercial.role !== 'commercial') {
+  // ✅ Ajouter un client (Commercial uniquement)
+  async createClient(dto: CreateClientDto, user: User): Promise<Client> {
+    if (user.role !== 'commercial') {
       throw new ForbiddenException('Seuls les commerciaux peuvent ajouter des clients.');
     }
 
-    const newClient = this.clientRepository.create({ 
-      ...dto, 
-      commercial 
+    const client = this.clientRepository.create({
+      ...dto,
+      commercial: user,
     });
-    return await this.clientRepository.save(newClient);
+
+    return this.clientRepository.save(client);
   }
 
-  // ✅ Obtenir tous les clients
+  // ✅ Voir tous les clients
   async getAllClients(): Promise<Client[]> {
-    return await this.clientRepository.find();
-    // ⛔ PAS besoin de { relations: ['commercial'] } car tu as mis eager: true dans l'entité
+    return this.clientRepository.find();
   }
 
-  // ✅ Obtenir un client par ID
+  // ✅ Voir un client spécifique
   async getClientById(id: number): Promise<Client> {
     const client = await this.clientRepository.findOne({ where: { id } });
     if (!client) throw new NotFoundException('Client non trouvé.');
     return client;
   }
 
-  // ✅ Mettre à jour un client
-  async updateClient(id: number, dto: CreateClientDto, commercial: User): Promise<Client> {
+  // ✅ Modifier un client
+  async updateClient(id: number, dto: CreateClientDto, user: User): Promise<Client> {
     const client = await this.clientRepository.findOne({
-      where: { id, commercial: { id: commercial.id } }, 
+      where: { id },
     });
+
     if (!client) throw new NotFoundException('Client non trouvé.');
+
+    if (user.role === 'commercial' && client.commercial?.id !== user.id) {
+      throw new ForbiddenException('Vous ne pouvez modifier que vos propres clients.');
+    }
 
     Object.assign(client, dto);
-    return await this.clientRepository.save(client);
+    return this.clientRepository.save(client);
   }
 
-  // ✅ Supprimer un client
-  async deleteClient(id: number, commercial: User): Promise<void> {
-    const client = await this.clientRepository.findOne({
-      where: { id, commercial: { id: commercial.id } },
-    });
+  async deleteClient(id: number, user: User): Promise<{ message: string }> {
+    const client = await this.clientRepository.findOne({ where: { id } });
     if (!client) throw new NotFoundException('Client non trouvé.');
-
+  
+    if (user.role === 'commercial' && client.commercial?.id !== user.id) {
+      throw new ForbiddenException('Vous ne pouvez supprimer que vos propres clients.');
+    }
+  
     await this.clientRepository.remove(client);
+    return { message: 'Client supprimé avec succès.' };
+  }
+  
+  async updateClientStatus(id: number, isActive: boolean, user: User): Promise<{ message: string; client: Client }> {
+    const client = await this.clientRepository.findOne({ where: { id } });
+    if (!client) throw new NotFoundException('Client non trouvé.');
+  
+    if (user.role === 'commercial' && client.commercial?.id !== user.id) {
+      throw new ForbiddenException('Vous ne pouvez modifier que vos propres clients.');
+    }
+  
+    client.isActive = isActive;
+    const updated = await this.clientRepository.save(client);
+  
+    return {
+      message: `Client ${isActive ? 'activé' : 'désactivé'} avec succès.`,
+      client: updated,
+    };
   }
 }
