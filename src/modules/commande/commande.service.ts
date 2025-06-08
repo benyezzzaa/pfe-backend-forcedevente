@@ -31,12 +31,13 @@ export class CommandeService {
     let prixHorsTaxeTotal = 0;
 
     // 🛒 Créer la commande vide
-    const commande = this.commandeRepository.create({
-      numero_commande: dto.numeroCommande,
-      prix_total_ttc: 0,
-      prix_hors_taxe: 0,
-      commercial,
-    });
+   const commande = this.commandeRepository.create({
+  numero_commande: dto.numeroCommande,
+  prix_total_ttc: 0,
+  prix_hors_taxe: 0,
+  commercial,
+  client: { id: dto.clientId }, // ✅ AJOUTER LE CLIENT
+});
 
     const savedCommande = await this.commandeRepository.save(commande);
 
@@ -77,41 +78,49 @@ export class CommandeService {
     return savedCommande;
   }
 
-  async getAllCommandes(): Promise<Commande[]> {
-    return this.commandeRepository.find({
-      relations: ['lignesCommande', 'lignesCommande.produit', 'commercial'],
-      order: { id: 'DESC' },
-    });
+ async getAllCommandes(): Promise<Commande[]> {
+  return this.commandeRepository.find({
+    relations: [
+      'client', // ✅ important pour Flutter
+      'lignesCommande',
+      'lignesCommande.produit',
+      'commercial',
+    ],
+    order: { id: 'DESC' },
+  });
+}
+
+
+ async getBandeDeCommande(id: number) {
+  const commande = await this.commandeRepository.findOne({
+    where: { id },
+    relations: ['lignesCommande', 'lignesCommande.produit', 'commercial'],
+  });
+
+  if (!commande) {
+    throw new NotFoundException(`Commande avec ID ${id} introuvable`);
   }
 
-  async getBandeDeCommande(id: number) {
-    const commande = await this.commandeRepository.findOne({
-      where: { id },
-      relations: ['lignesCommande', 'lignesCommande.produit', 'commercial'],
-    });
+  return {
+    numeroCommande: commande.numero_commande,
+    date: commande.date_creation,
+    commercial: {
+      nom: commande.commercial?.nom,
+      prenom: commande.commercial?.prenom,
+      email: commande.commercial?.email,
+    },
+    produits: commande.lignesCommande.map((ligne) => ({
+      id: ligne.id, // ✅ ID ajouté ici
+      nomProduit: ligne.produit?.nom,
+      quantite: ligne.quantite,
+      prixUnitaire: ligne.prixUnitaire,
+      total: ligne.total,
+    })),
+   prixTotalTTC: Number(commande.prix_total_ttc),
+prixHorsTaxe: Number(commande.prix_hors_taxe),
+  };
+}
 
-    if (!commande) {
-      throw new NotFoundException(`Commande avec ID ${id} introuvable`);
-    }
-
-    return {
-      numeroCommande: commande.numero_commande,
-      date: commande.date_creation,
-      commercial: {
-        nom: commande.commercial?.nom,
-        prenom: commande.commercial?.prenom,
-        email: commande.commercial?.email,
-      },
-      produits: commande.lignesCommande.map((ligne) => ({
-        nomProduit: ligne.produit?.nom,
-        quantite: ligne.quantite,
-        prixUnitaire: ligne.prixUnitaire,
-        total: ligne.total, // ✅ utiliser directement total stocké
-      })),
-      prixTotalTTC: commande.prix_total_ttc,
-      prixHorsTaxe: commande.prix_hors_taxe,
-    };
-  }
   async updateCommande(id: number, updateDto: UpdateCommandeDto) {
     const commande = await this.commandeRepository.findOne({
       where: { id },
@@ -167,13 +176,13 @@ export class CommandeService {
   }
   
   async validerCommande(id: number) {
-    const commande = await this.commandeRepository.findOne({ where: { id } });
-    if (!commande) {
-      throw new NotFoundException('Commande introuvable');
-    }
-    commande.statut = 'validee';
-    return this.commandeRepository.save(commande);
+  const commande = await this.commandeRepository.findOne({ where: { id } });
+  if (!commande) {
+    throw new NotFoundException('Commande introuvable');
   }
+  commande.statut = 'validee';
+  return this.commandeRepository.save(commande);
+}
   
 
   async deleteCommande(id: number) {

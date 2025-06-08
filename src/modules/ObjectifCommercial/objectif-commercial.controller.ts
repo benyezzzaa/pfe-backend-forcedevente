@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, ParseIntPipe, Request } from '@nestjs/common';
 import { ObjectifCommercialService } from './objectif-commercial.service';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -19,13 +19,21 @@ export class ObjectifCommercialController {
   create(@Body() dto: CreateObjectifDto) {
     return this.service.create(dto);
   }
-
+@Get('me/sales-by-category')
+@SetRoles('commercial')
+getMySalesByCategory(@Request() req) {
+  return this.service.getSalesByCategory(req.user.userId);
+}
   @Get()
   @SetRoles('admin')
   findAll() {
     return this.service.findAll();
   }
-
+@Get('me/by-year')
+@SetRoles('commercial')
+getMyObjectifs(@Request() req) {
+  return this.service.getByCommercialGroupedByYear(req.user.userId);
+}
   @Patch(':id/status')
   @SetRoles('admin')
   toggleStatus(@Param('id', ParseIntPipe) id: number) {

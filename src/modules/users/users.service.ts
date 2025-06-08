@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -62,14 +63,25 @@ export class UsersService {
     }
     return this.userRepository.find();
   }
-
-  // ✅ Activer / Désactiver un utilisateur
-  async updateStatus(id: number, isActive: boolean) {
+  async updateUser(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOneBy({ id });
-    if (!user) throw new NotFoundException('Utilisateur introuvable');
-    user.isActive = isActive;
+  
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+  
+    // Mise à jour des champs
+    Object.assign(user, updateUserDto);
+  
     return this.userRepository.save(user);
   }
+  // ✅ Activer / Désactiver un utilisateur
+  async updateStatus(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
+    user.isActive = true;
+    return this.userRepository.save(user);
+  } 
   async createAdmin(dto: CreateUserDto): Promise<User> {
     const existing = await this.userRepository.findOne({ where: { email: dto.email } });
     if (existing) throw new BadRequestException('Email déjà utilisé');
@@ -84,5 +96,22 @@ export class UsersService {
     });
   
     return this.userRepository.save(admin);
+  }
+  async updatePosition(id: number, latitude: number, longitude: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`Utilisateur ${id} introuvable`);
+    }
+  
+    user.latitude = latitude;
+    user.longitude = longitude;
+    return await this.userRepository.save(user);
+  }
+  
+  async getAllCommercialsWithPosition() {
+    return await this.userRepository.find({
+      where: { role: 'commercial', isActive: true },
+      select: ['id', 'nom', 'prenom', 'latitude', 'longitude'],
+    });
   }
 }

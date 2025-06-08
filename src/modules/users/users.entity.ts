@@ -1,14 +1,15 @@
+// src/modules/user/user.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Client } from '../client/client.entity';
-
 import { Visite } from '../Visite/visite.entity';
 import { Commande } from '../commande/commande.entity';
-@Entity({ name: 'users' }) // 🔥 Vérifie bien que la table s'appelle `users`
+
+@Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false }) // 🔥 Empêche les valeurs NULL
+  @Column({ nullable: false })
   nom: string;
 
   @Column({ nullable: false })
@@ -25,16 +26,22 @@ export class User {
 
   @Column({ type: 'enum', enum: ['commercial', 'admin', 'bo'], default: 'commercial' })
   role: string;
+
+  @Column({ type: 'float', nullable: true })
+  latitude: number;
+
+  @Column({ type: 'float', nullable: true })
+  longitude: number;
+
+  @Column({ default: false })
+  isActive: boolean ;
+
   @OneToMany(() => Client, (client) => client.commercial, { cascade: true })
-clients: Client[];
-  // ✅ Ajoute cette relation avec `Visite`
+  clients: Client[];
+
   @OneToMany(() => Visite, (visite) => visite.user)
   visites: Visite[];
-   // ✅ Ajout de la relation avec `Commande`
-   @OneToMany(() => Commande, (commande) => commande.commercial)
-   commandes: Commande[];
-   @Column({ default: true })
-isActive: boolean;
 
-
+  @OneToMany(() => Commande, (commande) => commande.commercial)
+  commandes: Commande[];
 }

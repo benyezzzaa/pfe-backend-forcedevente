@@ -36,6 +36,6 @@ export class AuthService {
   
     console.log("✅ Token généré :", token); // 🔥 Ajoute ça pour voir le token en console
   
-    return { access_token: token };
+    return { access_token: token ,user:user};
   }
 }

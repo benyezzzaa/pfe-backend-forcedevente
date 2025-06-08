@@ -1,5 +1,5 @@
 // ✅ categorie-produit.controller.ts
-import { Controller, Get, Post, Patch, Delete, Param, Body, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, ParseIntPipe, UseGuards, Put } from '@nestjs/common';
 import { CategorieProduitService } from './categorie-produit.service';
 import { CreateCategorieDto } from './dto/create-categorie.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -32,7 +32,7 @@ export class CategorieProduitController {
     return this.service.getById(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @SetRoles('admin')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateCategorieDto) {
     return this.service.update(id, dto);

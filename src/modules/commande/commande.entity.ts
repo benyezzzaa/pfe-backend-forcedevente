@@ -2,6 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'ty
 import { User } from '../users/users.entity';
 import { LigneCommande } from '../lignecommande/lignecommande.entity';
 import { Facture } from '../facture/facture.entity';
+import { Client } from '../client/client.entity';
+import { Produit } from '../produit/produit.entity';
 
 @Entity({ name: 'commande' })
 export class Commande {
@@ -22,7 +24,10 @@ export class Commande {
 
   @ManyToOne(() => User, (user) => user.commandes, { onDelete: 'SET NULL' })
   commercial: User;
-
+@ManyToOne(() => Client, client => client.commandes, { eager: true })
+client: Client;
+@ManyToOne(() => Produit, (produit) => produit.lignesCommande, { eager: true })
+produit: Produit;
   @OneToMany(() => LigneCommande, (ligneCommande) => ligneCommande.commande, { cascade: true })
   lignesCommande: LigneCommande[];
   // 🚀 Ajout de la relation avec Facture

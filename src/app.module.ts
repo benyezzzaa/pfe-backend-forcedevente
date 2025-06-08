@@ -30,6 +30,9 @@ import { RaisonVisite } from './modules/raison-visite/raison-visite.entity';
 import { RaisonVisiteModule } from './modules/raison-visite/raison-visite.module';
 import { ObjectifCommercialModule } from './modules/ObjectifCommercial/objectif-commercial.module';
 import { PromotionModule } from './modules/Promotion/promotion.module';
+import { Circuit } from './modules/circuit/circuit.entity';
+import { CircuitModule } from './modules/circuit/circuit.module';
+import { ReclamationModule } from './modules/reclamation/reclamation.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -41,7 +44,7 @@ import { PromotionModule } from './modules/Promotion/promotion.module';
       database: process.env.DATABASE_NAME || 'postgres',
       autoLoadEntities: true,
       synchronize: true, // ⚠️ Mettre `false` en production et utiliser des migrations
-      entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, Unite,ReglementFacture,RaisonVisiteModule,ObjectifCommercialModule,PromotionModule], // ✅ Ajout de `Facture` et `Reglement`
+      entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, Unite,ReglementFacture,RaisonVisiteModule,ObjectifCommercialModule,PromotionModule,CircuitModule], // ✅ Ajout de `Facture` et `Reglement`
     }),
     UsersModule,
     AuthModule,
@@ -61,6 +64,8 @@ import { PromotionModule } from './modules/Promotion/promotion.module';
     RaisonVisiteModule,
     ObjectifCommercialModule,
     PromotionModule,
+    CircuitModule,
+    ReclamationModule,
 
   ],
   providers: [],

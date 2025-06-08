@@ -7,6 +7,8 @@ import {
     Body,
     UseGuards,
     ParseIntPipe,
+    Request,
+    Put,
   } from '@nestjs/common';
  
 
@@ -30,19 +32,17 @@ import { PromotionService } from './Promotion.Service';
       return this.promoService.create(dto);
     }
   
-    @Get()
-    @SetRoles('admin')
-    findAll() {
-      return this.promoService.findAll();
-    }
+ @Get()
+@SetRoles('admin', 'commercial')
+findAll(@Request() req) {
+  console.log('👤 Role:', req.user.role); // ➕ debug
+  return this.promoService.findAll(); // temporairement sans filtrage
+}
   
-    @Patch(':id')
+    @Put()
     @SetRoles('admin')
-    update(
-      @Param('id', ParseIntPipe) id: number,
-      @Body() dto: CreatePromotionDto,
-    ) {
-      return this.promoService.update(id, dto);
+    updateFromBody(@Body() dto: CreatePromotionDto & { id: number }) {
+      return this.promoService.update(dto.id, dto);
     }
   
     @Patch(':id/status')

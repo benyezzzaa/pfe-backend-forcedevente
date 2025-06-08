@@ -1,21 +1,42 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateClientDto {
-  @ApiProperty({ example: 'Ali', description: 'Nom du client' })
-  nom: string;
+  @ApiProperty({ example: 'Ali' })
+  @IsOptional()
+  @IsString()
+  nom?: string;
+ @ApiProperty({ example: 36.8065, required: false })
+@IsOptional()
+@IsNumber()
+latitude?: number;
 
-  @ApiProperty({ example: 'Ben Salah', description: 'Prénom du client' })
-  prenom: string;
+@ApiProperty({ example: 10.1815, required: false })
+@IsOptional()
+@IsNumber()
+longitude?: number;
+  @ApiProperty({ example: 'Ben Salah' })
+  @IsOptional()
+  @IsString()
+  prenom?: string;
 
-  @ApiProperty({ example: 'ali.bensalah@example.com', description: 'Email du client' })
-  email: string;
+  @ApiProperty({ example: 'ali@example.com' })
+  @IsOptional()
+  @IsString()
+  email?: string;
 
-  @ApiProperty({ example: '555123456', description: 'Téléphone du client' })
-  telephone: string;
+  @ApiProperty({ example: '123456789' })
+  @IsOptional()
+  @IsString()
+  telephone?: string;
 
-  @ApiProperty({ example: '10 Rue de Tunis', description: 'Adresse du client' })
-  adresse: string;
+  @ApiProperty({ example: 'Rue de Tunis' })
+  @IsOptional()
+  @IsString()
+  adresse?: string;
 
-  @ApiProperty({ example: true, description: 'Est-ce un client fidèle ?', default: false })
-  estFidele: boolean;
+  @ApiProperty({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  estFidele?: boolean;
 }

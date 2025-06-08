@@ -1,34 +1,24 @@
-// src/modules/commande/dto/create-commande.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
+// 📁 create-commande.dto.ts
+import { IsString, IsArray, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsString, IsNumber, IsArray, ValidateNested } from 'class-validator';
 
-export class CreateCommandeDto {
-  @ApiProperty({ example: 'CMD1234' })
-  @IsString()
-  numeroCommande: string; // ✅ DOIT être camelCase (comme Swagger)
-
-  @ApiProperty({ example: 100.5 })
-  @IsNumber()
-  prixTotalTTC: number;
-
-  @ApiProperty({ example: 95 })
-  @IsNumber()
-  prixHorsTaxe: number;
-
-  @ApiProperty({ type: () => [LigneCommandeCreateDto] })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => LigneCommandeCreateDto)
-  lignesCommande: LigneCommandeCreateDto[];
-}
-
-export class LigneCommandeCreateDto {
-  @ApiProperty({ example: 1 })
+class LigneCommandeDto {
   @IsNumber()
   produitId: number;
 
-  @ApiProperty({ example: 5 })
   @IsNumber()
   quantite: number;
+}
+
+export class CreateCommandeDto {
+  @IsString()
+  numeroCommande: string;
+
+  @IsNumber()
+  clientId: number; // ✅ Ajout ici
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LigneCommandeDto)
+  lignesCommande: LigneCommandeDto[];
 }

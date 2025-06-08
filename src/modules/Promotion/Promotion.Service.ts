@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Promotion } from './promotion.entity';
 import { CreatePromotionDto } from './DTO/CreatePromotionDto.dto';
-
+import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 
 @Injectable()
 export class PromotionService {
@@ -16,10 +16,23 @@ export class PromotionService {
     const promo = this.promoRepo.create(dto);
     return await this.promoRepo.save(promo);
   }
+async findActive(): Promise<Promotion[]> {
+  const today = new Date();
+  return this.promoRepo.find({
+    where: {
+      isActive: true,
+      dateDebut: LessThanOrEqual(today),
+      dateFin: MoreThanOrEqual(today),
+    },
+  });
+}
 
-  findAll(): Promise<Promotion[]> {
-    return this.promoRepo.find();
-  }
+  async findAll(): Promise<Promotion[]> {
+  console.log('⏳ Appel à findAll()');
+  const promos = await this.promoRepo.find();
+  console.log('✅ Promotions trouvées :', promos);
+  return promos;
+}
 
   async update(id: number, dto: CreatePromotionDto): Promise<Promotion> {
     const promo = await this.promoRepo.findOneBy({ id });

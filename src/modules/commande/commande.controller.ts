@@ -1,4 +1,14 @@
-import { Controller, Post, Get, Body, Request, UseGuards, Delete, Param, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Request,
+  UseGuards,
+  Delete,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { CommandeService } from './commande.service';
 import { CreateCommandeDto } from './dto/create-commande.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
@@ -16,37 +26,9 @@ export class CommandeController {
 
   @Post()
   async createCommande(@Body() dto: CreateCommandeDto, @Request() req) {
-    console.log('📦 RAW DTO:', dto);
-    console.log('🔍 TYPEOF:', typeof dto, dto.constructor?.name);
-    console.log('🔍 numeroCommande:', dto.numeroCommande);
     return this.commandeService.createCommande(dto, req.user);
   }
-  @Get('validees')
-@SetRoles('admin', 'commercial')
-@ApiOperation({ summary: 'Voir uniquement les commandes validées' })
-async getCommandesValidees() {
-  return this.commandeService.getCommandesValidees();
-}
 
-// Modifier la quantité d'une ligne de commande
-@Patch(':id')
-@SetRoles('admin')
-@ApiOperation({ summary: 'Modifier une commande (admin)' })
-async updateCommande(@Param('id') id: number, @Body() updateDto: UpdateCommandeDto) {
-  return this.commandeService.updateCommande(id, updateDto);
-}
-@Patch('message/:id')
-@SetRoles('admin')
-async envoyerMessage(@Param('id') id: number, @Body() body: { message: string }) {
-  // Stocker le message dans la base ou l'envoyer par email
-}
-// Valider une commande
-@Patch('valider/:id')
-@SetRoles('admin')
-@ApiOperation({ summary: 'Valider une commande (admin)' })
-async validerCommande(@Param('id') id: number) {
-  return this.commandeService.validerCommande(id);
-}
   @Get()
   @SetRoles('admin', 'commercial')
   @ApiOperation({ summary: 'Voir toutes les commandes' })
@@ -54,11 +36,47 @@ async validerCommande(@Param('id') id: number) {
     return this.commandeService.getAllCommandes();
   }
 
+  @Get('validees')
+  @SetRoles('admin', 'commercial')
+  @ApiOperation({ summary: 'Voir uniquement les commandes validées' })
+  async getCommandesValidees() {
+    return this.commandeService.getCommandesValidees();
+  }
+
   @Get('bande/:id')
   @SetRoles('admin', 'commercial')
   @ApiOperation({ summary: 'Voir une bande de commande spécifique' })
   async getBandeDeCommande(@Param('id') id: number) {
     return this.commandeService.getBandeDeCommande(id);
+  }
+
+  @Patch(':id')
+  @SetRoles('admin')
+  @ApiOperation({ summary: 'Modifier une commande (admin)' })
+  async updateCommande(
+    @Param('id') id: number,
+    @Body() updateDto: UpdateCommandeDto,
+  ) {
+    return this.commandeService.updateCommande(id, updateDto);
+  }
+
+ @Patch('valider/:id')
+@SetRoles('admin') // ❗ Bloque les commerciaux
+@ApiOperation({ summary: 'Valider une commande (admin)' })
+validerCommande(@Param('id') id: number) {
+  return this.commandeService.validerCommande(+id);
+}
+
+@Get('validees')
+@UseGuards(JwtAuthGuard)
+findCommandesValidees() {
+  return this.commandeService.getCommandesValidees();
+}
+
+  @Patch('message/:id')
+  @SetRoles('admin')
+  async envoyerMessage(@Param('id') id: number, @Body() body: { message: string }) {
+    // Stockage ou envoi du message (pas encore implémenté)
   }
 
   @Delete(':id')

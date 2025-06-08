@@ -65,7 +65,46 @@ export class ProduitController {
   async getProduits() {
     return this.produitService.getAllProduits();
   }
-
+  @Patch(':id')
+  @SetRoles('admin')
+  @UseInterceptors(FilesInterceptor('images', 5, {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, callback) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        callback(null, file.fieldname + '-' + uniqueSuffix + extname(file.originalname));
+      },
+    }),
+  }))
+  @ApiOperation({ summary: 'Modifier un produit' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        nom: { type: 'string' },
+        description: { type: 'string' },
+        prix: { type: 'number' },
+        stock: { type: 'number' },
+        prix_unitaire: { type: 'number' },
+        categorieId: { type: 'string' },
+        uniteId: { type: 'string' },
+        images: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+        },
+      },
+    },
+  })
+  async updateProduit(
+    @Param('id') id: string,
+    @Body() dto: CreateProduitDto,
+    @UploadedFiles() files: MulterFile[],
+  ) {
+    const imagePaths = files.map(file => `/uploads/${file.filename}`);
+    return this.produitService.updateProduit(Number(id), dto, imagePaths);
+  }
+  
   @Patch(':id/status')
   @SetRoles('admin')
   @ApiOperation({ summary: 'Activer/Désactiver un produit' })

@@ -1,13 +1,31 @@
-// create-objectif.dto.ts
+import { IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateObjectifDto {
-    commercialId: number;
-    dateDebut: Date;
-    dateFin: Date;
-    montantCible: number;
-    categorieProduit?: string;
-    prime: number;
-    mission?: string;
-    bonus?: number;
-  }
-  
+  @IsNumber()
+  commercialId: number;
+
+  @IsDateString()
+  dateDebut: string;
+
+  @IsDateString()
+  dateFin: string;
+
+  @IsNumber()
+  montantCible: number;
+
+  @IsOptional()
+  @IsString()
+  categorieProduit?: string;
+
+  @IsOptional()
+  @IsNumber()
+  prime?: number;
+
+  @IsOptional()
+  @IsString()
+  mission?: string;
+
+  @IsOptional()
+  @IsNumber()
+  bonus?: number;
+}

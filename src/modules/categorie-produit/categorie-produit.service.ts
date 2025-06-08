@@ -37,4 +37,5 @@ export class CategorieProduitService {
     const result = await this.categorieRepository.delete(id);
     if (result.affected === 0) throw new NotFoundException('Catégorie introuvable');
   }
+  
 }

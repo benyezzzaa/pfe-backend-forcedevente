@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   NotFoundException,
+  Put,
 } from '@nestjs/common';
 import { RaisonVisiteService } from './raison-visite.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -20,7 +21,12 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class RaisonVisiteController {
   constructor(private readonly service: RaisonVisiteService) {}
-
+// ✅ Route visible pour tout utilisateur authentifié
+@Get('actives')
+@SetRoles('admin', 'commercial') // ou même supprime @SetRoles pour tous
+findActives() {
+  return this.service.findActive();
+}
   @Get()
   @SetRoles('admin')
   findAll() {
@@ -35,10 +41,7 @@ export class RaisonVisiteController {
 
   @Patch(':id')
   @SetRoles('admin')
-  update(@Param('id') id: number, @Body() body: any) {
-    console.log('▶️ PATCH reçu pour id:', id);
-    console.log('📦 Body reçu :', body);
-
+  update(@Param('id') id: number, @Body() body: { nom: string }) {
     if (!body.nom || typeof body.nom !== 'string') {
       throw new NotFoundException('Le champ "nom" est requis.');
     }
@@ -46,7 +49,7 @@ export class RaisonVisiteController {
     return this.service.update(id, body.nom);
   }
 
-  @Patch(':id/status')
+  @Put(':id/status')
   @SetRoles('admin')
   toggleActive(@Param('id') id: number) {
     return this.service.toggleActive(id);

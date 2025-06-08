@@ -16,4 +16,10 @@ export class Commercial {
 
   @Column()
   tel: string;
+
+  @Column({ type: 'float', nullable: true }) // 🌍 latitude
+  latitude: number;
+
+  @Column({ type: 'float', nullable: true }) // 🌍 longitude
+  longitude: number;
 }

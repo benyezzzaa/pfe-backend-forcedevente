@@ -1,11 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { User } from '../users/users.entity';
+import { Commande } from '../commande/commande.entity';
 
 @Entity({ name: 'client' }) // ✅ Vérifie que c'est bien `client` dans ta base
 export class Client {
   @PrimaryGeneratedColumn()
   id: number;
+@Column({ type: 'double precision', nullable: true })
+latitude: number;
 
+@Column({ type: 'double precision', nullable: true })
+longitude: number;
   @Column({ nullable: false })
   nom: string;
 
@@ -20,7 +25,9 @@ export class Client {
 
   @Column({ nullable: false })
   adresse: string;
-
+ // ✅ LA RELATION MANQUANTE
+  @OneToMany(() => Commande, commande => commande.client)
+  commandes: Commande[];
   // ✅ Cette relation est PARFAITE pour relier chaque client à son commercial
   @ManyToOne(() => User, (user) => user.clients, { 
     onDelete: 'CASCADE', 
@@ -30,4 +37,5 @@ export class Client {
   commercial: User;
   @Column({ default: true })
 isActive: boolean;
+
 }

@@ -1,3 +1,5 @@
+// src/modules/user/users.controller.ts
+
 import {
   Controller,
   Get,
@@ -6,10 +8,12 @@ import {
   Param,
   Patch,
   Query,
-  UseGuards
+  UseGuards,
+  Put
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -30,24 +34,57 @@ export class UsersController {
     return this.usersService.createCommercial(createUserDto);
   }
 
+  // ✅ Créer un admin
+  @Post('create-admin')
+  @SetRoles('admin')
+  @ApiOperation({ summary: 'Créer un administrateur' })
+  createAdmin(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.createAdmin(createUserDto);
+  }
+
   // ✅ Obtenir tous les utilisateurs (avec filtre optionnel par rôle)
   @Get()
   @SetRoles('admin')
-  @ApiOperation({ summary: 'Lister les utilisateurs avec filtre par rôle' })
+  @ApiOperation({ summary: 'Lister les utilisateurs (avec filtre par rôle)' })
   findUsers(@Query('role') role?: string) {
     return this.usersService.findByRole(role);
   }
 
   // ✅ Activer/Désactiver un utilisateur
-  @Patch(':id/status')
+  @Put(':id/status')
   @SetRoles('admin')
   @ApiOperation({ summary: 'Activer ou désactiver un utilisateur' })
-  toggleUserStatus(@Param('id') id: number, @Body() body: { isActive: boolean }) {
-    return this.usersService.updateStatus(id, body.isActive);
+  toggleUserStatus(@Param('id') id: number) {
+    return this.usersService.updateStatus(id);
   }
-  @Post('create-admin')
-@SetRoles('admin')
-createAdmin(@Body() createUserDto: CreateUserDto) {
-  return this.usersService.createAdmin(createUserDto);
-}
+
+  // ✅ Modifier un utilisateur
+  @Patch(':id')
+  @SetRoles('admin')
+  @ApiOperation({ summary: 'Modifier les informations d\'un utilisateur' })
+  updateUser(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+    return this.usersService.updateUser(id, updateUserDto);
+  }
+
+  // ✅ Modifier la position (latitude, longitude)
+  @Patch(':id/position')
+  @SetRoles('admin')
+  @ApiOperation({ summary: 'Mettre à jour la position d\'un commercial' })
+  updatePosition(
+    @Param('id') id: number,
+    @Body() body: { latitude: number; longitude: number }
+  ) {
+    return this.usersService.updatePosition(id, body.latitude, body.longitude);
+  }
+
+  // ✅ Obtenir la carte des commerciaux
+  @Get('commercials/map')
+  @SetRoles('admin')
+  @ApiOperation({ summary: 'Obtenir la position de tous les commerciaux' })
+  getCommercialsWithPosition() {
+    return this.usersService.getAllCommercialsWithPosition();
+  }
 }
