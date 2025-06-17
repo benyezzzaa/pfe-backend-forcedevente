@@ -1,7 +1,9 @@
 // ✅ CONTROLLER - produit.controller.ts
 import {
   Controller, Post, Body, Get, UploadedFiles, UseInterceptors,
-  UseGuards, Patch, Param
+  UseGuards, Patch, Param,
+  Header,
+  Put
 } from '@nestjs/common';
 import { ProduitService } from './produit.service';
 import { CreateProduitDto } from './dto/create-produit.dto';
@@ -65,7 +67,7 @@ export class ProduitController {
   async getProduits() {
     return this.produitService.getAllProduits();
   }
-  @Patch(':id')
+  @Put(':id')
   @SetRoles('admin')
   @UseInterceptors(FilesInterceptor('images', 5, {
     storage: diskStorage({
@@ -105,7 +107,7 @@ export class ProduitController {
     return this.produitService.updateProduit(Number(id), dto, imagePaths);
   }
   
-  @Patch(':id/status')
+  @Put(':id/status')
   @SetRoles('admin')
   @ApiOperation({ summary: 'Activer/Désactiver un produit' })
   @ApiConsumes('application/json')

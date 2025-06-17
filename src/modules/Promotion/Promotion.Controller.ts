@@ -45,7 +45,7 @@ findAll(@Request() req) {
       return this.promoService.update(dto.id, dto);
     }
   
-    @Patch(':id/status')
+    @Put(':id/status')
     @SetRoles('admin')
     toggleStatus(@Param('id', ParseIntPipe) id: number) {
       return this.promoService.toggleStatus(id);

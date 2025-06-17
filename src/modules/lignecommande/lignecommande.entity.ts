@@ -13,7 +13,8 @@ export class LigneCommande {
   total: number; // ✅ Nouveau champ ajouté pour stocker total de la ligne (quantité * prix)
 
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2    , nullable: false // Empêche les valeurs nulles
+ })
   prixUnitaire: number;
 
   @ManyToOne(() => Commande, (commande) => commande.lignesCommande, { onDelete: 'CASCADE' })

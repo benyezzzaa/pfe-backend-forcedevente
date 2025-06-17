@@ -1,31 +1,28 @@
 import { IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateObjectifDto {
-  @IsNumber()
-  commercialId: number;
+@IsNumber()
+commercialId: number;
+@IsNumber()
+montantCible: number;
+@IsDateString()
+dateDebut: string;
 
-  @IsDateString()
-  dateDebut: string;
+@IsDateString()
+dateFin: string;
 
-  @IsDateString()
-  dateFin: string;
+@IsNumber()
+prime: number;
 
-  @IsNumber()
-  montantCible: number;
+@IsNumber()
+@IsOptional()
+pourcentageCible?: number;
 
-  @IsOptional()
-  @IsString()
-  categorieProduit?: string;
+@IsString()
+@IsOptional()
+categorieProduit?: string;
 
-  @IsOptional()
-  @IsNumber()
-  prime?: number;
-
-  @IsOptional()
-  @IsString()
-  mission?: string;
-
-  @IsOptional()
-  @IsNumber()
-  bonus?: number;
+@IsString()
+@IsOptional()
+mission?: string;
 }

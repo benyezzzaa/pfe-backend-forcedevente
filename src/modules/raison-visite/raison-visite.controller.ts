@@ -39,7 +39,7 @@ findActives() {
     return this.service.create(nom);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @SetRoles('admin')
   update(@Param('id') id: number, @Body() body: { nom: string }) {
     if (!body.nom || typeof body.nom !== 'string') {

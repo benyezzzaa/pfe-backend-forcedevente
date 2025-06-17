@@ -19,7 +19,11 @@ export class UniteController {
 getAllUnites() {
   return this.uniteService.findAll();
 }
-
+@Put(':id/status')
+@ApiOperation({ summary: 'Activer ou désactiver une unité' })
+toggleStatus(@Param('id') id: number, @Body('isActive') isActive: boolean) {
+  return this.uniteService.toggleStatus(id, isActive);
+}
   @Get()
   @ApiOperation({ summary: 'Lister toutes les unités (depuis produit)' })
 findAllUnitesFromProduit() {

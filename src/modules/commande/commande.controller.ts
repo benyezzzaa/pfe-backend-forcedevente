@@ -8,6 +8,9 @@ import {
   Delete,
   Param,
   Patch,
+  Req,
+  Put,
+  Res,
 } from '@nestjs/common';
 import { CommandeService } from './commande.service';
 import { CreateCommandeDto } from './dto/create-commande.dto';
@@ -16,7 +19,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { SetRoles } from '../auth/setRoles.decorator';
 import { UpdateCommandeDto } from './dto/update-commande.dto';
-
+import { Not } from 'typeorm';
+import { Response } from 'express';
 @ApiTags('Commandes')
 @ApiBearerAuth()
 @Controller('commandes')
@@ -60,13 +64,19 @@ export class CommandeController {
     return this.commandeService.updateCommande(id, updateDto);
   }
 
- @Patch('valider/:id')
+ @Put('valider/:id')
 @SetRoles('admin') // ❗ Bloque les commerciaux
 @ApiOperation({ summary: 'Valider une commande (admin)' })
 validerCommande(@Param('id') id: number) {
   return this.commandeService.validerCommande(+id);
 }
-
+@Get('me')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@SetRoles('commercial')
+async getMyCommandes(@Req() req) {
+  const userId = req.user.id;
+  return this.commandeService.findAllByCommercial(userId, { statut: Not('validée') });
+}
 @Get('validees')
 @UseGuards(JwtAuthGuard)
 findCommandesValidees() {
@@ -78,7 +88,18 @@ findCommandesValidees() {
   async envoyerMessage(@Param('id') id: number, @Body() body: { message: string }) {
     // Stockage ou envoi du message (pas encore implémenté)
   }
-
+// commandes.controller.ts
+@Get('pdf/:id')
+@UseGuards(JwtAuthGuard)
+@Get(':id/pdf')
+async downloadPdf(@Param('id') id: number, @Res() res: Response) {
+  const pdfBuffer = await this.commandeService.generatePdf(+id);
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename="commande_${id}.pdf"`,
+  });
+  res.send(pdfBuffer);
+}
   @Delete(':id')
   @SetRoles('admin')
   @ApiOperation({ summary: 'Supprimer une commande' })

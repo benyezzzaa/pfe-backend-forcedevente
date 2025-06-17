@@ -55,18 +55,36 @@ export class DashboardService {
     }));
   }
 
-  async getVentesParMois() {
-    const result = await this.commandeRepository
-      .createQueryBuilder('commande')
-      .select("TO_CHAR(commande.date_creation, 'Mon')", 'mois')
-      .addSelect('SUM(commande.prix_total_ttc)', 'montant')
-      .groupBy('mois')
-      .orderBy('min(commande.date_creation)', 'ASC')
-      .getRawMany();
+ async getVentesParMois() {
+  // Obtenir l'année courante
+  const currentYear = new Date().getFullYear();
+  
+  const result = await this.commandeRepository
+    .createQueryBuilder('commande')
+    .select("EXTRACT(MONTH FROM commande.dateCreation)", 'mois_num')
+    .addSelect("TO_CHAR(commande.dateCreation, 'TMMonth')", 'mois') // Format complet en français
+    .addSelect('COALESCE(SUM(commande.prix_total_ttc), 0)', 'montant')
+    .where("EXTRACT(YEAR FROM commande.dateCreation) = :year", { year: currentYear })
+    .groupBy('mois_num, mois')
+    .orderBy('mois_num', 'ASC')
+    .getRawMany();
 
-    return result.map(r => ({
-      mois: r.mois,
-      montant: parseFloat(r.montant),
-    }));
-  }
+  // Créer un tableau pour tous les mois
+  const allMonths = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date(currentYear, i, 1);
+    return {
+      mois_num: i + 1,
+      mois: date.toLocaleString('fr-FR', { month: 'long' })
+    };
+  });
+
+  // Fusionner avec les résultats
+  return allMonths.map(month => {
+    const found = result.find(r => r.mois_num == month.mois_num);
+    return {
+      mois: month.mois.charAt(0).toUpperCase() + month.mois.slice(1), // Capitaliser
+      montant: found ? parseFloat(found.montant) : 0
+    };
+  });
+}
 }

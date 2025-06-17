@@ -11,7 +11,8 @@ export class User {
 
   @Column({ nullable: false })
   nom: string;
-
+@Column({ nullable: true }) // ✅ temporairement
+adresse: string;
   @Column({ nullable: false })
   prenom: string;
 

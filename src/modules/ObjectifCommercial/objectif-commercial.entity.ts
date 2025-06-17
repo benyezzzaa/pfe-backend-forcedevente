@@ -32,7 +32,8 @@ export class ObjectifCommercial {
 
   @Column({ type: 'float', nullable: true })
   bonus?: number;
-
+@Column({ type: 'float', nullable: true })
+pourcentageCible?: number; // Par exemple : 30 pour 30%
   @Column({ default: true })
   isActive: boolean;
 }

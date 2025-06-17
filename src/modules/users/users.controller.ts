@@ -54,12 +54,13 @@ export class UsersController {
   @Put(':id/status')
   @SetRoles('admin')
   @ApiOperation({ summary: 'Activer ou désactiver un utilisateur' })
-  toggleUserStatus(@Param('id') id: number) {
-    return this.usersService.updateStatus(id);
+  toggleUserStatus(@Param('id') id: number,
+ @Body() body: { isActive: boolean }) {
+    return this.usersService.updateStatus(id, body.isActive);
   }
 
   // ✅ Modifier un utilisateur
-  @Patch(':id')
+  @Put(':id')
   @SetRoles('admin')
   @ApiOperation({ summary: 'Modifier les informations d\'un utilisateur' })
   updateUser(

@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { LignecommandeController } from './lignecommande.controller';
+import { LigneCommandeController } from './lignecommande.controller';
 
 describe('LignecommandeController', () => {
-  let controller: LignecommandeController;
+  let controller: LigneCommandeController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [LignecommandeController],
+      controllers: [LigneCommandeController],
     }).compile();
 
-    controller = module.get<LignecommandeController>(LignecommandeController);
+    controller = module.get<LigneCommandeController>(LigneCommandeController);
   });
 
   it('should be defined', () => {

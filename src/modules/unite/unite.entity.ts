@@ -8,7 +8,8 @@ export class Unite {
 
   @Column({ unique: true }) // ✅ Rendre `nom` unique
   nom: string;
-
+@Column({ default: true })
+isActive: boolean;
   @OneToMany(() => Produit, (produit) => produit.unite)
   produits: Produit[];
 }

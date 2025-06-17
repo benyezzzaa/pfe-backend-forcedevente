@@ -29,10 +29,12 @@ findActive(): Promise<RaisonVisite[]> {
     return this.raisonRepo.save(raison);
   }
 
-  async toggleActive(id: number): Promise<RaisonVisite> {
-    const raison = await this.raisonRepo.findOneBy({ id });
-    if (!raison) throw new NotFoundException('Raison introuvable');
-    raison.isActive = false;
-    return this.raisonRepo.save(raison);
-  }
+async toggleActive(id: number): Promise<RaisonVisite> {
+  const raison = await this.raisonRepo.findOneBy({ id });
+  if (!raison) throw new NotFoundException('Raison introuvable');
+
+  raison.isActive = !raison.isActive; // ⬅️ toggle dynamique ici
+  return this.raisonRepo.save(raison);
+}
+
 }

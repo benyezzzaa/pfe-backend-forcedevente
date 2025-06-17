@@ -7,7 +7,9 @@ import { CreateCommandeDto } from './dto/create-commande.dto';
 import { User } from '../users/users.entity';
 import { Produit } from '../produit/produit.entity';
 import { UpdateCommandeDto } from './dto/update-commande.dto';
-
+import * as PDFDocument from 'pdfkit';
+import { Response } from 'express';
+import { Readable } from 'stream';
 @Injectable()
 export class CommandeService {
   constructor(
@@ -20,7 +22,40 @@ export class CommandeService {
     @InjectRepository(Produit)
     private produitRepository: Repository<Produit>,
   ) {}
+async generatePdf(id: number): Promise<Buffer> {
+  const commande = await this.commandeRepository.findOne({
+    where: { id },
+    relations: ['client', 'lignes'], // Ajoute relations nécessaires
+  });
 
+  if (!commande) throw new NotFoundException('Commande introuvable');
+
+  const doc = new PDFDocument();
+  const buffers: any[] = [];
+
+  doc.on('data', buffers.push.bind(buffers));
+  doc.on('end', () => {});
+
+  // Contenu du PDF
+  doc.fontSize(18).text(`Commande N° ${commande.numero_commande}`, { align: 'center' });
+  doc.moveDown();
+  doc.fontSize(14).text(`Client : ${commande.client.nom}`);
+  doc.text(`Date : ${commande.dateCreation}`);
+  doc.moveDown();
+  doc.fontSize(16).text('Lignes de commande :');
+  commande.lignesCommande.forEach((ligne, i) => {
+    doc.text(`- ${ligne.produit.nom} x ${ligne.quantite} = ${ligne.prixUnitaire} TND`);
+  });
+  doc.moveDown();
+  doc.fontSize(14).text(`Total TTC : ${commande.prix_total_ttc} TND`);
+
+  doc.end();
+
+  return new Promise((resolve, reject) => {
+    doc.on('end', () => resolve(Buffer.concat(buffers)));
+    doc.on('error', reject);
+  });
+}
   async createCommande(dto: CreateCommandeDto, commercial: User): Promise<Commande> {
     if (commercial.role !== 'commercial') {
       throw new ForbiddenException('Seuls les commerciaux peuvent créer des commandes.');
@@ -77,6 +112,14 @@ export class CommandeService {
 
     return savedCommande;
   }
+async findAllByCommercial(userId: number, filters?: any): Promise<Commande[]> {
+  return this.commandeRepository.find({
+    where: { commercial: { id: userId } },
+    
+    relations: ['client', 'lignesCommande'],
+    order: { dateCreation: 'DESC' },
+  });
+}
 
  async getAllCommandes(): Promise<Commande[]> {
   return this.commandeRepository.find({
@@ -103,7 +146,7 @@ export class CommandeService {
 
   return {
     numeroCommande: commande.numero_commande,
-    date: commande.date_creation,
+    date: commande.dateCreation,
     commercial: {
       nom: commande.commercial?.nom,
       prenom: commande.commercial?.prenom,
@@ -192,4 +235,37 @@ prixHorsTaxe: Number(commande.prix_hors_taxe),
     }
     return this.commandeRepository.remove(commande);
   }
+// commande.service.ts
+
+async recalculerTotauxCommande(commandeId: number): Promise<void> {
+  // Correction: Utiliser 'lignesCommande' au lieu de 'lignes'
+  const commande = await this.commandeRepository.findOne({
+    where: { id: commandeId },
+    relations: ['lignesCommande'], // <-- Correction ici
+  });
+
+  if (!commande) {
+    throw new NotFoundException(`Commande ${commandeId} non trouvée`);
+  }
+
+  let totalHT = 0;
+
+  // Correction: Utiliser commande.lignesCommande au lieu de commande.lignes
+  for (const ligne of commande.lignesCommande) {
+    const total = Number(ligne.total);
+    if (isNaN(total)) {
+      throw new BadRequestException(`Total invalide pour la ligne ${ligne.id}`);
+    }
+    totalHT += total;
+  }
+
+  const prixTotalTTC = parseFloat((totalHT * 1.19).toFixed(2));
+  
+  commande.prix_hors_taxe = parseFloat(totalHT.toFixed(2));
+  commande.prix_total_ttc = prixTotalTTC;
+
+  await this.commandeRepository.save(commande);
+}
+
+
 }

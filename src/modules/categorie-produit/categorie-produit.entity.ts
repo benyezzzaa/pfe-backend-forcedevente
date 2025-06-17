@@ -13,6 +13,7 @@ export class CategorieProduit {
   @Column({ type: 'varchar', nullable: false, unique: true })
   @ApiProperty({ example: 'Boissons' })
   nom: string;
+  
 
   @OneToMany(() => Produit, (produit) => produit.categorie)
   produits: Produit[];

@@ -33,7 +33,11 @@ export class UniteService {
     Object.assign(unite, dto);
     return await this.uniteRepository.save(unite);
   }
-
+async toggleStatus(id: number, isActive: boolean): Promise<Unite> {
+  const unite = await this.findOne(id);
+  unite.isActive = isActive;
+  return this.uniteRepository.save(unite);
+}
   async delete(id: number): Promise<void> {
     const unite = await this.findOne(id);
     await this.uniteRepository.remove(unite);

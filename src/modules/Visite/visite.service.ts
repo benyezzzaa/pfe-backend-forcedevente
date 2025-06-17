@@ -9,6 +9,7 @@ import { Visite } from './visite.entity';
 import { CreateVisiteDto } from './dto/create-visite.dto';
 import { User } from '../users/users.entity';
 import { Client } from '../client/client.entity';
+import { RaisonVisite } from '../raison-visite/raison-visite.entity';
 
 @Injectable()
 export class VisiteService {
@@ -18,18 +19,22 @@ export class VisiteService {
 
     @InjectRepository(Client)
     private clientRepository: Repository<Client>, // ✅ injecté ici
+      @InjectRepository(RaisonVisite)
+    private raisonVisiteRepository: Repository<RaisonVisite>,
   ) {}
 
   async createVisite(dto: CreateVisiteDto, user: User): Promise<Visite> {
     // 🔍 Vérifier si le client existe
     const client = await this.clientRepository.findOneBy({ id: dto.clientId });
     if (!client) throw new NotFoundException('Client non trouvé.');
-
+  const raison = await this.raisonVisiteRepository.findOneBy({ id: dto.raisonId });
+  if (!raison) throw new NotFoundException('Raison de visite non trouvée.');
     // 🔨 Créer la visite avec client + commercial (user)
     const newVisite = this.visiteRepository.create({
       ...dto,
       user,
       client,
+    raison 
     });
 
     return await this.visiteRepository.save(newVisite);

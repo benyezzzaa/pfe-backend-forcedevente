@@ -20,6 +20,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { SetRoles } from '../auth/setRoles.decorator';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UpdateClientStatusDto } from './DTO/update-client-status.dto';
 
 @ApiTags('client')
 @ApiBearerAuth()
@@ -43,6 +44,7 @@ export class ClientController {
   async getAllClients() {
     return this.clientService.getAllClients();
   }
+  
 
   // ✅ Voir MES clients (⚠️ doit être AVANT ':id')
   @Get('mes-clients')
@@ -87,16 +89,16 @@ export class ClientController {
   }
 
   // ✅ Activer/Désactiver un client
-  @Patch(':id/status')
-  @SetRoles('admin', 'commercial')
-  @ApiOperation({ summary: 'Activer ou désactiver un client' })
-  async updateClientStatus(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { isActive: boolean },
-    @Request() req,
-  ) {
-    return this.clientService.updateClientStatus(id, body.isActive, req.user);
-  }
+@Put(':id/status')
+@SetRoles('admin', 'commercial')
+@ApiOperation({ summary: 'Activer ou désactiver un client' })
+async updateClientStatus(
+  @Param('id', ParseIntPipe) id: number,
+  @Body() body: UpdateClientStatusDto,
+  @Request() req,
+) {
+  return this.clientService.updateClientStatus(id, body.isActive, req.user);
+}
 
   // ✅ OPTIONS (utile pour CORS et Swagger parfois)
   @Options(':id/status')

@@ -60,46 +60,51 @@ export class ProduitService {
       relations: ['categorie', 'unite'],
     });
   }
-  async updateProduit(id: number, dto: CreateProduitDto, imageFilenames?: string[]) {
-    const produit = await this.produitRepository.findOneBy({ id });
-  
-    if (!produit) {
-      throw new NotFoundException('Produit introuvable');
-    }
-  
-    // Mettre à jour les champs
-    produit.nom = dto.nom ?? produit.nom;
-    produit.description = dto.description ?? produit.description;
-    produit.prix = dto.prix ?? produit.prix;
-    produit.stock = dto.stock ?? produit.stock;
-    produit.prix_unitaire = dto.prix_unitaire ?? produit.prix_unitaire;
-  
-    if (dto.uniteId) {
-      const unite = await this.uniteRepository
-        .createQueryBuilder('unite')
-        .where('LOWER(unite.nom) = LOWER(:nom)', { nom: dto.uniteId })
-        .getOne();
-      if (!unite) {
-        throw new NotFoundException(`Unité "${dto.uniteId}" non trouvée.`);
-      }
-      produit.uniteId = unite.nom;
-    }
-  
-    if (dto.categorieId) {
-      const categorie = await this.categorieProduitRepository.findOneBy({ nom: dto.categorieId });
-      if (!categorie) {
-        throw new NotFoundException(`Catégorie "${dto.categorieId}" non trouvée.`);
-      }
-      produit.categorieId = categorie.id;
-    }
-  
-    if (imageFilenames && imageFilenames.length > 0) {
-      produit.images = imageFilenames;
-    }
-  
-    return this.produitRepository.save(produit);
+async updateProduit(id: number, dto: CreateProduitDto, imageFilenames?: string[]) {
+  const produit = await this.produitRepository.findOneBy({ id });
+
+  if (!produit) {
+    throw new NotFoundException('Produit introuvable');
   }
-  
+
+  // Update fields
+  produit.nom = dto.nom ?? produit.nom;
+  produit.description = dto.description ?? produit.description;
+  produit.prix = dto.prix ?? produit.prix;
+  produit.stock = dto.stock ?? produit.stock;
+  produit.prix_unitaire = dto.prix_unitaire ?? produit.prix_unitaire;
+
+  if (dto.uniteId) {
+    const unite = await this.uniteRepository
+      .createQueryBuilder('unite')
+      .where('LOWER(unite.nom) = LOWER(:nom)', { nom: dto.uniteId })
+      .getOne();
+    if (!unite) {
+      throw new NotFoundException(`Unité "${dto.uniteId}" non trouvée.`);
+    }
+    produit.uniteId = unite.nom;
+  }
+
+  if (dto.categorieId) {
+    // Convert categorieId to number
+    const categorieIdNum = parseInt(dto.categorieId);
+    if (isNaN(categorieIdNum)) {
+      throw new BadRequestException(`Catégorie ID "${dto.categorieId}" invalide, un nombre est requis.`);
+    }
+
+    const categorie = await this.categorieProduitRepository.findOneBy({ id: categorieIdNum });
+    if (!categorie) {
+      throw new NotFoundException(`Catégorie "${dto.categorieId}" non trouvée.`);
+    }
+    produit.categorieId = categorie.id;
+  }
+
+  if (imageFilenames && imageFilenames.length > 0) {
+    produit.images = imageFilenames;
+  }
+
+  return this.produitRepository.save(produit);
+}
   async updateStatut(id: number, isActive: boolean) {
     const produit = await this.produitRepository.findOneBy({ id });
 
