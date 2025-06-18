@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -23,22 +24,46 @@ export class VisiteService {
     private raisonVisiteRepository: Repository<RaisonVisite>,
   ) {}
 
-  async createVisite(dto: CreateVisiteDto, user: User): Promise<Visite> {
-    // 🔍 Vérifier si le client existe
-    const client = await this.clientRepository.findOneBy({ id: dto.clientId });
-    if (!client) throw new NotFoundException('Client non trouvé.');
+async createVisite(dto: CreateVisiteDto, user: User): Promise<Visite> {
+  const client = await this.clientRepository.findOneBy({ id: dto.clientId });
+  if (!client) throw new NotFoundException('Client non trouvé.');
+
   const raison = await this.raisonVisiteRepository.findOneBy({ id: dto.raisonId });
   if (!raison) throw new NotFoundException('Raison de visite non trouvée.');
-    // 🔨 Créer la visite avec client + commercial (user)
-    const newVisite = this.visiteRepository.create({
-      ...dto,
-      user,
-      client,
-    raison 
-    });
 
-    return await this.visiteRepository.save(newVisite);
+  if (!dto.date) {
+    throw new BadRequestException('Date manquante.');
   }
+
+  const date = new Date(dto.date);
+  if (isNaN(date.getTime())) {
+    throw new BadRequestException('Format de date invalide.');
+  }
+
+  const onlyDate = date.toISOString().split('T')[0]; // "YYYY-MM-DD"
+
+  const existingVisite = await this.visiteRepository
+    .createQueryBuilder('visite')
+    .where('visite.userId = :userId', { userId: user.id })
+    .andWhere('visite.client_id = :clientId', { clientId: dto.clientId })
+    .andWhere("DATE(visite.date) = :date", { date: onlyDate })
+    .getOne();
+
+  if (existingVisite) {
+    throw new ForbiddenException("Une visite pour ce client existe déjà à cette date.");
+  }
+
+  const newVisite = this.visiteRepository.create({
+    date,
+    user,
+    client,
+    raison,
+  });
+
+  return await this.visiteRepository.save(newVisite);
+}
+
+
 
    // 👇 Cette méthode correspond à GET /visites/all
    async getAllVisites(): Promise<Visite[]> {

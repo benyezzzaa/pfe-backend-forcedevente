@@ -3,8 +3,7 @@ import { IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
 export class CreateObjectifDto {
 @IsNumber()
 commercialId: number;
-@IsNumber()
-montantCible: number;
+
 @IsDateString()
 dateDebut: string;
 

@@ -1,5 +1,3 @@
-// objectif-commercial.entity.ts
-
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../users/users.entity';
 
@@ -18,8 +16,7 @@ export class ObjectifCommercial {
   @Column({ type: 'date' })
   dateFin: Date;
 
-  @Column({ type: 'float' })
-  montantCible: number;
+  
 
   @Column({ nullable: true })
   categorieProduit?: string;

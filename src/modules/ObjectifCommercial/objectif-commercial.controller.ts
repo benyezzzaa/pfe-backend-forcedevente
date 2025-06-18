@@ -57,7 +57,7 @@ remove(@Param('id', ParseIntPipe) id: number) {
 getMyObjectifs(@Request() req) {
   return this.service.getByCommercialGroupedByYear(req.user.userId);
 }
-  @Patch(':id/status')
+  @Put(':id/status')
   @SetRoles('admin')
   toggleStatus(@Param('id', ParseIntPipe) id: number) {
     return this.service.toggleStatus(id);
