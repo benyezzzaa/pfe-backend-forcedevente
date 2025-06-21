@@ -63,7 +63,7 @@ export class UsersController {
   @Put(':id')
   @SetRoles('admin')
   @ApiOperation({ summary: 'Modifier les informations d\'un utilisateur' })
-  updateUser(
+  updateUser( 
     @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto
   ) {

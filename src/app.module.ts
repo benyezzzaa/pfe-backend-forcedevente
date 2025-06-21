@@ -33,6 +33,7 @@ import { PromotionModule } from './modules/Promotion/promotion.module';
 import { Circuit } from './modules/circuit/circuit.entity';
 import { CircuitModule } from './modules/circuit/circuit.module';
 import { ReclamationModule } from './modules/reclamation/reclamation.module';
+import { SatisfactionModule } from './modules/SatisfactionSurvey/satisfaction.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -66,6 +67,7 @@ import { ReclamationModule } from './modules/reclamation/reclamation.module';
     PromotionModule,
     CircuitModule,
     ReclamationModule,
+    SatisfactionModule,
 
   ],
   providers: [],

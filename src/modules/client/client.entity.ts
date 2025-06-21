@@ -37,5 +37,6 @@ longitude: number;
   commercial: User;
   @Column({ default: true })
 isActive: boolean;
+    surveys: any;
 
 }

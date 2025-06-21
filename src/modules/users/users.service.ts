@@ -150,7 +150,13 @@ export class UsersService {
     user.isActive = isActive;
     return this.userRepository.save(user);
   }
+async updatePassword(email: string, hashedPassword: string) {
+  const user = await this.userRepository.findOne({ where: { email } });
+  if (!user) throw new NotFoundException('Utilisateur introuvable');
 
+  user.password = hashedPassword;
+  return this.userRepository.save(user);
+}
   async updatePosition(id: number, latitude: number, longitude: number) {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) {
