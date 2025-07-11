@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEmail, IsEnum, MinLength, IsOptional, IsNotEmpty } from 'class-validator';
+import { IsString, IsEmail, IsEnum, MinLength, IsOptional, IsNotEmpty, Matches } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'Ali' })
@@ -23,9 +23,13 @@ export class CreateUserDto {
 
   isActive: boolean;
 
-  @ApiProperty({ example: '555123456' })
+   @ApiProperty({ example: '0612345678', description: 'Numéro français valide' })
+  @IsOptional()
   @IsString()
-  tel: string;
+  @Matches(/^(?:\+33|0)[1-9]\d{8}$/, {
+    message: 'Le numéro de téléphone doit être un numéro français valide (ex: 0612345678 ou +33612345678).',
+  })
+  tel?: string;
 
   @ApiProperty({ enum: ['commercial', 'admin', 'bo'], required: false })
 @IsEnum(['commercial', 'admin', 'bo'])

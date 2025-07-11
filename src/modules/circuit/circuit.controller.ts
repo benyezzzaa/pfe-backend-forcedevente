@@ -25,6 +25,7 @@ async getTodayCircuit(@Request() req) {
   const dateStr = today.toISOString().split('T')[0];
   return this.service.getCircuitByDate(req.user, dateStr);
 }
+
   @Get()
   async getByDate(@Request() req, @Query('date') date: string) {
     return this.service.getCircuitByDate(req.user, date);

@@ -1,5 +1,6 @@
 import {
-  Controller, Post, Get, Body, Param, Patch, Request, UseGuards
+  Controller, Post, Get, Body, Param, Patch, Request, UseGuards,
+  Put
 } from '@nestjs/common';
 import { ReclamationService } from './reclamation.service';
 import { CreateReclamationDto } from './DTO/create-reclamation.dto';
@@ -36,7 +37,7 @@ findOpen() {
     return this.service.findByUser(req.user.id);
   }
 
-  @Patch(':id/status')
+  @Put(':id/status')
   @SetRoles('admin')
   updateStatus(@Param('id') id: number, @Body('status') status: string) {
     return this.service.updateStatus(id, status);

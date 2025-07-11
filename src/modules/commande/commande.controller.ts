@@ -91,7 +91,7 @@ findCommandesValidees() {
 // commandes.controller.ts
 @Get('pdf/:id')
 @UseGuards(JwtAuthGuard)
-@Get(':id/pdf')
+
 async downloadPdf(@Param('id') id: number, @Res() res: Response) {
   const pdfBuffer = await this.commandeService.generatePdf(+id);
   res.set({

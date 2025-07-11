@@ -47,7 +47,11 @@ async getTodayCircuit(user: User): Promise<Circuit | null> {
   return this.circuitRepo.save(circuit);
 }
 
-
+async findAll(): Promise<Circuit[]> {
+    return this.circuitRepo.find({
+      relations: ['clients'], // si besoin
+    });
+  }
 
   async getCircuitByDate(user: User, date: string): Promise<Circuit | null> {
     return this.circuitRepo.findOne({

@@ -10,6 +10,8 @@ import { UpdateCommandeDto } from './dto/update-commande.dto';
 import * as PDFDocument from 'pdfkit';
 import { Response } from 'express';
 import { Readable } from 'stream';
+
+import * as getStream from 'get-stream';
 @Injectable()
 export class CommandeService {
   constructor(
@@ -25,37 +27,40 @@ export class CommandeService {
 async generatePdf(id: number): Promise<Buffer> {
   const commande = await this.commandeRepository.findOne({
     where: { id },
-    relations: ['client', 'lignes'], // Ajoute relations nécessaires
+    relations: ['lignesCommande', 'lignesCommande.produit', 'client'],
   });
 
-  if (!commande) throw new NotFoundException('Commande introuvable');
+  if (!commande) {
+    throw new Error('Commande introuvable.');
+  }
 
+  if (!commande.lignesCommande || commande.lignesCommande.length === 0) {
+    throw new Error('La commande ne contient aucune ligne.');
+  }
+
+  // ✅ Création du PDF
   const doc = new PDFDocument();
-  const buffers: any[] = [];
-
-  doc.on('data', buffers.push.bind(buffers));
-  doc.on('end', () => {});
-
-  // Contenu du PDF
-  doc.fontSize(18).text(`Commande N° ${commande.numero_commande}`, { align: 'center' });
+  doc.fontSize(18).text(`Commande #${commande.numero_commande}`, { underline: true });
   doc.moveDown();
-  doc.fontSize(14).text(`Client : ${commande.client.nom}`);
+  doc.fontSize(12).text(`Client : ${commande.client.nom}`);
   doc.text(`Date : ${commande.dateCreation}`);
+  doc.text(`Statut : ${commande.statut}`);
+  doc.text(`Total TTC : ${commande.prix_total_ttc} DT`);
   doc.moveDown();
-  doc.fontSize(16).text('Lignes de commande :');
-  commande.lignesCommande.forEach((ligne, i) => {
-    doc.text(`- ${ligne.produit.nom} x ${ligne.quantite} = ${ligne.prixUnitaire} TND`);
+
+  doc.fontSize(14).text('Produits commandés :');
+  commande.lignesCommande.forEach((ligne) => {
+    doc.fontSize(12).text(
+      `- ${ligne.produit.nom} x${ligne.quantite} = ${ligne.total} DT`
+    );
   });
-  doc.moveDown();
-  doc.fontSize(14).text(`Total TTC : ${commande.prix_total_ttc} TND`);
 
   doc.end();
-
-  return new Promise((resolve, reject) => {
-    doc.on('end', () => resolve(Buffer.concat(buffers)));
-    doc.on('error', reject);
-  });
+  const buffer = await getStream.buffer(doc);
+  return buffer;
 }
+
+
   async createCommande(dto: CreateCommandeDto, commercial: User): Promise<Commande> {
     if (commercial.role !== 'commercial') {
       throw new ForbiddenException('Seuls les commerciaux peuvent créer des commandes.');
@@ -137,7 +142,7 @@ async findAllByCommercial(userId: number, filters?: any): Promise<Commande[]> {
  async getBandeDeCommande(id: number) {
   const commande = await this.commandeRepository.findOne({
     where: { id },
-    relations: ['lignesCommande', 'lignesCommande.produit', 'commercial'],
+    relations: ['lignesCommande', 'lignesCommande.produit', 'commercial', 'client'], // Ajout relation client
   });
 
   if (!commande) {
@@ -152,15 +157,20 @@ async findAllByCommercial(userId: number, filters?: any): Promise<Commande[]> {
       prenom: commande.commercial?.prenom,
       email: commande.commercial?.email,
     },
+    client: {
+      nom: commande.client?.nom,
+      prenom: commande.client?.prenom,
+      code_fiscal: commande.client?.codeFiscale, // Assure-toi que ce champ existe dans Client
+    },
     produits: commande.lignesCommande.map((ligne) => ({
-      id: ligne.id, // ✅ ID ajouté ici
+      id: ligne.id,
       nomProduit: ligne.produit?.nom,
       quantite: ligne.quantite,
       prixUnitaire: ligne.prixUnitaire,
       total: ligne.total,
     })),
-   prixTotalTTC: Number(commande.prix_total_ttc),
-prixHorsTaxe: Number(commande.prix_hors_taxe),
+    prixTotalTTC: Number(commande.prix_total_ttc),
+    prixHorsTaxe: Number(commande.prix_hors_taxe),
   };
 }
 
@@ -224,6 +234,7 @@ prixHorsTaxe: Number(commande.prix_hors_taxe),
     throw new NotFoundException('Commande introuvable');
   }
   commande.statut = 'validee';
+   commande.date_validation = new Date();
   return this.commandeRepository.save(commande);
 }
   

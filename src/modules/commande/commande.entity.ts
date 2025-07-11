@@ -22,7 +22,8 @@ export class Commande {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   prix_total_ttc: number;
-
+@Column({ type: 'timestamp', nullable: true })
+date_validation: Date;
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   prix_hors_taxe: number;
 @OneToMany(() => LigneCommande, ligne => ligne.commande, { cascade: true })
@@ -33,7 +34,8 @@ lignesCommande: LigneCommande[];
 client: Client;
 @ManyToOne(() => Produit, (produit) => produit.lignesCommande, { eager: true })
 produit: Produit;
-
+@OneToMany(() => LigneCommande, (ligne) => ligne.commande, { cascade: true })
+lignes: LigneCommande[];
   // 🚀 Ajout de la relation avec Facture
   @OneToMany(() => Facture, (facture) => facture.commande, { cascade: true })
   factures: Facture[];

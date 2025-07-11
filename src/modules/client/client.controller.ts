@@ -13,6 +13,8 @@ import {
   HttpException,
   Options,
   ParseIntPipe,
+  BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { ClientService } from './client.service';
 import { CreateClientDto } from './DTO/create-client.dto';
@@ -36,6 +38,23 @@ export class ClientController {
   async createClient(@Body() dto: CreateClientDto, @Request() req) {
     return this.clientService.createClient(dto, req.user);
   }
+@Get('planning')
+@SetRoles('commercial')
+@ApiOperation({ summary: 'Obtenir la tournée optimisée des clients' })
+async getPlanning(
+  @Query('lat') lat: string,
+  @Query('lon') lon: string,
+  @Request() req
+) {
+  const parsedLat = parseFloat(lat);
+  const parsedLon = parseFloat(lon);
+
+  if (isNaN(parsedLat) || isNaN(parsedLon)) {
+    throw new BadRequestException('Latitude et longitude invalides.');
+  }
+
+  return this.clientService.getOptimizedPlanning(req.user, parsedLat, parsedLon);
+}
 
   // ✅ Voir tous les clients
   @Get()

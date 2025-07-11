@@ -22,9 +22,12 @@ longitude: number;
 
   @Column({ nullable: false })
   telephone: string;
-
+  @Column({ nullable: true })
+  codeFiscale?: string;
   @Column({ nullable: false })
   adresse: string;
+  @Column({ default: 3 })
+  importance: number;
  // ✅ LA RELATION MANQUANTE
   @OneToMany(() => Commande, commande => commande.client)
   commandes: Commande[];
