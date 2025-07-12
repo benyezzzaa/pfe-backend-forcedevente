@@ -31,7 +31,7 @@ longitude?: number;
 @Matches(/^(?:\+33|0)[1-9]\d{8}$/, {
   message: 'Le numéro de téléphone doit être un numéro français valide (ex: 0612345678 ou +33612345678).',
 })
-tel: string;
+telephone: string;
 
   @ApiProperty({ example: 'Rue de Tunis' })
   @IsOptional()

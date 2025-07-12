@@ -34,6 +34,9 @@ import { Circuit } from './modules/circuit/circuit.entity';
 import { CircuitModule } from './modules/circuit/circuit.module';
 import { ReclamationModule } from './modules/reclamation/reclamation.module';
 import { SatisfactionModule } from './modules/SatisfactionSurvey/satisfaction.module';
+import { join } from 'path';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -47,6 +50,28 @@ import { SatisfactionModule } from './modules/SatisfactionSurvey/satisfaction.mo
       synchronize: true, // ⚠️ Mettre `false` en production et utiliser des migrations
       entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, Unite,ReglementFacture,RaisonVisiteModule,ObjectifCommercialModule,PromotionModule,CircuitModule], // ✅ Ajout de `Facture` et `Reglement`
     }),
+     // ✅ Mailer configuration (e.g. for password reset)
+    MailerModule.forRoot({
+      transport: {
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER || 'fatmabenyezza90@gmail.com',
+          pass: process.env.EMAIL_PASS || 'frmo kdfw bqpr iari',
+
+        },
+      },
+      defaults: {
+        from: '"Sales Force App" <no-reply@salesforce.com>',
+      },
+      template: {
+        dir: join(__dirname, 'templates'),
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
+    }),
+
     UsersModule,
     AuthModule,
     ProduitModule,

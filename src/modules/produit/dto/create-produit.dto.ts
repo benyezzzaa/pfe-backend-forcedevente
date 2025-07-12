@@ -1,5 +1,5 @@
 // ✅ DTO - create-produit.dto.ts
-import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateProduitDto {
@@ -14,6 +14,7 @@ export class CreateProduitDto {
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
+  @Min(0, { message: 'Le prix doit être supérieur ou égal à 0.' })
   prix: number;
 
   @IsNotEmpty()
@@ -21,9 +22,10 @@ export class CreateProduitDto {
   @IsNumber()
   stock: number;
 
-  @IsNotEmpty()
+ @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
+  @Min(0, { message: 'Le prix unitaire doit être supérieur ou égal à 0.' })
   prix_unitaire: number;
 
   @IsNotEmpty()
