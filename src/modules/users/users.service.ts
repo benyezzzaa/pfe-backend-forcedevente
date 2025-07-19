@@ -14,75 +14,69 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
-  // ✅ Géocodage OpenStreetMap avec vérification
- private async geocodeAdresse(adresse: string): Promise<{ lat: number; lon: number }> {
-  console.log("📍 Adresse envoyée à Nominatim:", adresse); // 👈 Ajoute ça
-  const res = await axios.get('https://nominatim.openstreetmap.org/search', {
-    params: {
-      q: adresse,
-      format: 'json',
-      limit: 1,
-    },
-    headers: {
-      'User-Agent': 'nestjs-backend-app',
-    },
-  });
+  // ✅ Géocodage OpenStreetMap
+  private async geocodeAdresse(adresse: string): Promise<{ lat: number; lon: number }> {
+    const res = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: {
+        q: adresse,
+        format: 'json',
+        limit: 1,
+      },
+      headers: {
+        'User-Agent': 'nestjs-backend-app',
+      },
+    });
 
-  if (res.data.length === 0) {
-    throw new Error("Adresse introuvable");
+    if (res.data.length === 0) {
+      throw new Error("Adresse introuvable");
+    }
+
+    return {
+      lat: parseFloat(res.data[0].lat),
+      lon: parseFloat(res.data[0].lon),
+    };
   }
-
-  return {
-    lat: parseFloat(res.data[0].lat),
-    lon: parseFloat(res.data[0].lon),
-  };
-}
 
   // ✅ Créer un commercial avec géocodage
   async createCommercial(createUserDto: CreateUserDto): Promise<User> {
-  const existingUser = await this.userRepository.findOne({
-    where: { email: createUserDto.email },
-  });
+    const existingUser = await this.userRepository.findOne({
+      where: { email: createUserDto.email },
+    });
 
-  if (existingUser) {
-    throw new BadRequestException('Email déjà utilisé');
+    if (existingUser) {
+      throw new BadRequestException('Email déjà utilisé');
+    }
+
+    if (!createUserDto.adresse || createUserDto.adresse.trim() === '') {
+      throw new BadRequestException('Adresse obligatoire pour géolocaliser le commercial.');
+    }
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+
+    let coords;
+    try {
+      coords = await this.geocodeAdresse(createUserDto.adresse);
+    } catch (error) {
+      throw new BadRequestException("Adresse invalide ou non trouvée");
+    }
+
+    const commercial = this.userRepository.create({
+      nom: createUserDto.nom,
+      prenom: createUserDto.prenom,
+      email: createUserDto.email,
+      password: hashedPassword,
+      tel: createUserDto.tel,
+      adresse: createUserDto.adresse,
+      latitude: coords.lat,
+      longitude: coords.lon,
+      role: 'commercial',
+    });
+
+    return await this.userRepository.save(commercial);
   }
 
-  if (!createUserDto.adresse || createUserDto.adresse.trim() === '') {
-    throw new BadRequestException('Adresse obligatoire pour géolocaliser le commercial.');
-  }
-
-  // Hash du mot de passe
-  const salt = await bcrypt.genSalt();
-  const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
-
-  // Tentative de géocodage
-  let coords;
-  try {
-    console.log("Adresse reçue :", createUserDto.adresse);
-    coords = await this.geocodeAdresse(createUserDto.adresse);
-    console.log("Coordonnées récupérées :", coords);
-  } catch (error) {
-    console.error("Erreur géocodage :", error.message);
-    throw new BadRequestException("Adresse invalide ou non trouvée");
-  }
-
-  const commercial = this.userRepository.create({
-    nom: createUserDto.nom,
-    prenom: createUserDto.prenom,
-    email: createUserDto.email,
-    password: hashedPassword,
-    tel: createUserDto.tel,
-    adresse: createUserDto.adresse,
-    latitude: coords.lat,
-    longitude: coords.lon,
-    role: 'commercial',
-  });
-
-  return await this.userRepository.save(commercial);
-}
-
-  // ✅ Créer un admin sans géocodage
+  // ✅ Créer un admin
   async createAdmin(dto: CreateUserDto): Promise<User> {
     const existing = await this.userRepository.findOne({ where: { email: dto.email } });
     if (existing) throw new BadRequestException('Email déjà utilisé');
@@ -122,41 +116,45 @@ export class UsersService {
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto) {
-  const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id });
 
-  if (!user) {
-    throw new NotFoundException('Utilisateur non trouvé');
-  }
-
-  // Si l'adresse change, on recalcule les coordonnées
-  if (updateUserDto.adresse && updateUserDto.adresse !== user.adresse) {
-    try {
-      const coords = await this.geocodeAdresse(updateUserDto.adresse);
-      user.latitude = coords.lat;
-      user.longitude = coords.lon;
-    } catch (error) {
-      console.error("Erreur de géocodage:", error.message);
-      throw new BadRequestException("Adresse invalide ou non trouvée");
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
     }
+
+    if (user.role === 'commercial' && updateUserDto.role === 'admin') {
+      throw new BadRequestException("Un commercial ne peut pas être promu administrateur.");
+    }
+
+    if (updateUserDto.adresse && updateUserDto.adresse !== user.adresse) {
+      try {
+        const coords = await this.geocodeAdresse(updateUserDto.adresse);
+        user.latitude = coords.lat;
+        user.longitude = coords.lon;
+      } catch (error) {
+        throw new BadRequestException("Adresse invalide ou non trouvée");
+      }
+    }
+
+    Object.assign(user, updateUserDto);
+    return this.userRepository.save(user);
   }
 
-  Object.assign(user, updateUserDto);
-
-  return this.userRepository.save(user);
-}
   async updateStatus(id: number, isActive: boolean) {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) throw new NotFoundException('Utilisateur introuvable');
     user.isActive = isActive;
     return this.userRepository.save(user);
   }
-async updatePassword(email: string, hashedPassword: string) {
-  const user = await this.userRepository.findOne({ where: { email } });
-  if (!user) throw new NotFoundException('Utilisateur introuvable');
 
-  user.password = hashedPassword;
-  return this.userRepository.save(user);
-}
+  async updatePassword(email: string, hashedPassword: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
+
+    user.password = hashedPassword;
+    return this.userRepository.save(user);
+  }
+
   async updatePosition(id: number, latitude: number, longitude: number) {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) {

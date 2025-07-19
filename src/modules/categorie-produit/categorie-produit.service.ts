@@ -13,6 +13,14 @@ export class CategorieProduitService {
   ) {}
 
   async create(dto: CreateCategorieDto): Promise<CategorieProduit> {
+    // Vérifie l'existence insensible à la casse
+    const exist = await this.categorieRepository
+      .createQueryBuilder('cat')
+      .where('LOWER(cat.nom) = LOWER(:nom)', { nom: dto.nom.trim() })
+      .getOne();
+    if (exist) {
+      throw new NotFoundException('Cette catégorie existe déjà (insensible à la casse)');
+    }
     const cat = this.categorieRepository.create(dto);
     return this.categorieRepository.save(cat);
   }
@@ -27,7 +35,7 @@ export class CategorieProduitService {
     return cat;
   }
 
-  async update(id: number, dto: CreateCategorieDto): Promise<CategorieProduit> {
+  async update(id: number, dto: Partial<CreateCategorieDto>): Promise<CategorieProduit> {
     const cat = await this.getById(id);
     Object.assign(cat, dto);
     return this.categorieRepository.save(cat);

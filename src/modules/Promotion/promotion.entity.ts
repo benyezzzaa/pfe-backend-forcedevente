@@ -1,5 +1,5 @@
 // promotion.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 
 @Entity('promotion')
 export class Promotion {
@@ -8,7 +8,8 @@ export class Promotion {
 
   @Column()
   titre: string;
-
+@ManyToOne(() => Promotion, { nullable: true })
+promotion: Promotion;
   @Column({ type: 'text' })
   description: string;
 
@@ -22,5 +23,7 @@ export class Promotion {
   dateFin: Date;
 
   @Column({ default: true })
-  isActive: boolean;
+isActive: boolean;
+  // promotion.entity.ts
+
 }

@@ -10,6 +10,7 @@ import { Client } from './client.entity';
 import { CreateClientDto } from './DTO/create-client.dto';
 import { User } from '../users/users.entity';
 import { Visite } from '../Visite/visite.entity';
+import { CategorieClient } from './categorie-client.entity';
 
 
 @Injectable()
@@ -19,6 +20,8 @@ export class ClientService {
     private clientRepository: Repository<Client>,
     @InjectRepository(Visite)
     private visiteRepository: Repository<Visite>,
+    @InjectRepository(CategorieClient)
+  private categorieClientRepository: Repository<CategorieClient>,
   ) {}
 
   // ✅ Ajouter un client
@@ -107,7 +110,21 @@ export class ClientService {
       client: updated,
     };
   }
+async getCategoriesDuCommercial(user: User): Promise<CategorieClient[]> {
+  if (user.role !== 'commercial') {
+    throw new ForbiddenException('Seuls les commerciaux peuvent accéder à leurs catégories');
+  }
 
+  const categories = await this.categorieClientRepository
+    .createQueryBuilder('categorie')
+    .leftJoin('categorie.clients', 'client')
+    .where('client.commercial_id = :id', { id: user.id })
+    .groupBy('categorie.id')
+    .addGroupBy('categorie.nom')
+    .getMany();
+
+  return categories;
+}
   // ✅ Récupérer les clients d'un commercial
   async getClientsDuCommercial(user: User): Promise<Client[]> {
     if (!user || !user.id) {

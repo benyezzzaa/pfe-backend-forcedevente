@@ -6,27 +6,32 @@ export class ObjectifCommercial {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'commercial_id' })
-  commercial: User;
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'commercialId' })
+  commercial: User | null;
+
 
   @Column({ type: 'date' })
   dateDebut: Date;
 
   @Column({ type: 'date' })
   dateFin: Date;
-
-  
+@Column({ default: 0, type: 'float' })
+totalVentes: number;
+  @Column({ type: 'decimal', nullable: false, default: 0 })
+montantCible: number;
 
   @Column({ nullable: true })
   categorieProduit?: string;
 
   @Column({ type: 'float', default: 0 })
   prime: number;
-
+ @Column({ default: false })
+  atteint: boolean;
   @Column({ nullable: true })
   mission?: string;
-
+ @Column({ type: 'decimal', default: 0 })
+  ventes: number;
   @Column({ type: 'float', nullable: true })
   bonus?: number;
 @Column({ type: 'float', nullable: true })

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
 import { UniteService } from './unite.service';
 import { CreateUniteDto } from './dto/CreateUniteDto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
@@ -14,21 +14,29 @@ export class UniteController {
   create(@Body() dto: CreateUniteDto) {
     return this.uniteService.create(dto);
   }
+
   @Get('unites')
-@ApiOperation({ summary: 'Lister toutes les unités (alias)' })
-getAllUnites() {
-  return this.uniteService.findAll();
-}
-@Put(':id/status')
-@ApiOperation({ summary: 'Activer ou désactiver une unité' })
-toggleStatus(@Param('id') id: number, @Body('isActive') isActive: boolean) {
-  return this.uniteService.toggleStatus(id, isActive);
-}
+  @ApiOperation({ summary: 'Lister toutes les unités (alias)' })
+  getAllUnites() {
+    return this.uniteService.findAll();
+  }
+
+  @Put(':id/status')
+  @ApiOperation({ summary: 'Activer ou désactiver une unité' })
+  toggleStatus(@Param('id') id: number, @Body('isActive') isActive: boolean) {
+    return this.uniteService.toggleStatus(id, isActive);
+  }
+
+  // Route principale avec recherche et pagination
   @Get()
-  @ApiOperation({ summary: 'Lister toutes les unités (depuis produit)' })
-findAllUnitesFromProduit() {
-  return this.uniteService.findAll();
-}
+  @ApiOperation({ summary: 'Lister toutes les unités (avec recherche et pagination)' })
+  findAllUnitesFromProduit(
+    @Query('search') search?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.uniteService.findAll({ search, page, limit });
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtenir une unité par ID' })

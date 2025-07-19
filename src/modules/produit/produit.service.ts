@@ -9,6 +9,8 @@ import { Produit } from './produit.entity';
 import { CreateProduitDto } from './dto/create-produit.dto';
 import { CategorieProduit } from '../categorie-produit/categorie-produit.entity';
 import { Unite } from '../unite/unite.entity';
+import { UpdateStatutDto } from './dto/update-statut.dto';
+import { UpdateProduitDto } from './dto/update-produit.dto';
 
 @Injectable()
 export class ProduitService {
@@ -24,6 +26,7 @@ export class ProduitService {
   ) {}
 
   async createProduit(dto: CreateProduitDto, imageFilenames?: string[]) {
+    
     if (!dto.uniteId || !dto.categorieId) {
       throw new BadRequestException(
         'Les champs uniteId et categorieId sont requis.',
@@ -42,31 +45,18 @@ export class ProduitService {
     const categorie = await this.categorieProduitRepository.findOneBy({
       nom: dto.categorieId,
     });
+
     if (!categorie) {
       throw new NotFoundException(`Catégorie "${dto.categorieId}" non trouvée.`);
-    }
-
-    // 🔍 Vérifier si un produit similaire existe déjà
-    const produitExistant = await this.produitRepository.findOne({
-      where: {
-        nom: dto.nom.trim(),
-        categorieId: categorie.id,
-        prix: dto.prix,
-      },
-    });
-
-    if (produitExistant) {
-      throw new BadRequestException(
-        '❌ Un produit avec le même nom, catégorie et prix existe déjà.',
-      );
     }
 
     const produit = this.produitRepository.create({
       nom: dto.nom,
       description: dto.description,
-      prix: dto.prix,
-      stock: dto.stock,
       prix_unitaire: dto.prix_unitaire,
+      prix_unitaire_ttc: Number((dto.prix_unitaire * (1 + dto.tva / 100)).toFixed(2)),
+      tva: dto.tva,
+      colisage: dto.colisage,
       images: imageFilenames ?? [],
       uniteId: unite.nom,
       categorieId: categorie.id,
@@ -81,53 +71,47 @@ export class ProduitService {
     });
   }
 
-  async updateProduit(id: number, dto: CreateProduitDto, imageFilenames?: string[]) {
-    const produit = await this.produitRepository.findOneBy({ id });
+ async updateProduit(id: number, dto: UpdateProduitDto, imageFilenames?: string[]) {
+  const produit = await this.produitRepository.findOneBy({ id });
 
-    if (!produit) {
-      throw new NotFoundException('Produit introuvable');
-    }
-
-    produit.nom = dto.nom ?? produit.nom;
-    produit.description = dto.description ?? produit.description;
-    produit.prix = dto.prix ?? produit.prix;
-    produit.stock = dto.stock ?? produit.stock;
-    produit.prix_unitaire = dto.prix_unitaire ?? produit.prix_unitaire;
-
-    if (dto.uniteId) {
-      const unite = await this.uniteRepository
-        .createQueryBuilder('unite')
-        .where('LOWER(unite.nom) = LOWER(:nom)', { nom: dto.uniteId })
-        .getOne();
-      if (!unite) {
-        throw new NotFoundException(`Unité "${dto.uniteId}" non trouvée.`);
-      }
-      produit.uniteId = unite.nom;
-    }
-
-    if (dto.categorieId) {
-      const categorieIdNum = parseInt(dto.categorieId);
-      if (isNaN(categorieIdNum)) {
-        throw new BadRequestException(
-          `Catégorie ID "${dto.categorieId}" invalide, un nombre est requis.`,
-        );
-      }
-
-      const categorie = await this.categorieProduitRepository.findOneBy({
-        id: categorieIdNum,
-      });
-      if (!categorie) {
-        throw new NotFoundException(`Catégorie "${dto.categorieId}" non trouvée.`);
-      }
-      produit.categorieId = categorie.id;
-    }
-
-    if (imageFilenames && imageFilenames.length > 0) {
-      produit.images = imageFilenames;
-    }
-
-    return this.produitRepository.save(produit);
+  if (!produit) {
+    throw new NotFoundException('Produit introuvable');
   }
+
+  produit.nom = dto.nom ?? produit.nom;
+  produit.description = dto.description ?? produit.description;
+  produit.prix_unitaire = dto.prix_unitaire ?? produit.prix_unitaire;
+  produit.tva = dto.tva ?? produit.tva;
+  produit.colisage = dto.colisage ?? produit.colisage;
+
+  produit.prix_unitaire_ttc = Number(
+    ((produit.prix_unitaire) * (1 + produit.tva / 100)).toFixed(2)
+  );
+
+  if (dto.uniteId) {
+    const unite = await this.uniteRepository
+      .createQueryBuilder('unite')
+      .where('LOWER(unite.nom) = LOWER(:nom)', { nom: dto.uniteId })
+      .getOne();
+    if (!unite) throw new NotFoundException(`Unité "${dto.uniteId}" non trouvée.`);
+    produit.uniteId = unite.nom;
+  }
+
+  if (dto.categorieId) {
+    const categorie = await this.categorieProduitRepository
+      .createQueryBuilder('categorie')
+      .where('LOWER(categorie.nom) = LOWER(:nom)', { nom: dto.categorieId })
+      .getOne();
+    if (!categorie) throw new NotFoundException(`Catégorie "${dto.categorieId}" non trouvée.`);
+    produit.categorieId = categorie.id;
+  }
+
+  if (imageFilenames && imageFilenames.length > 0) {
+    produit.images = imageFilenames;
+  }
+
+  return this.produitRepository.save(produit);
+}
 
   async updateStatut(id: number, isActive: boolean) {
     const produit = await this.produitRepository.findOneBy({ id });
@@ -146,5 +130,59 @@ export class ProduitService {
     return {
       message: `Produit ${isActive ? 'activé' : 'désactivé'} ✅`,
     };
+  }
+
+  // Méthode pour créer des produits de test
+  async createTestProducts() {
+    const testProducts = [
+      {
+        nom: 'Lait Bio 1L',
+        description: 'Lait bio frais de vache',
+        prix_unitaire: 1.20,
+        tva: 5.5,
+        colisage: 12,
+        uniteId: 'Litre',
+        categorieId: 'Bio'
+      },
+      {
+        nom: 'Pain Complet',
+        description: 'Pain complet aux céréales',
+        prix_unitaire: 2.50,
+        tva: 5.5,
+        colisage: 1,
+        uniteId: 'Pièce',
+        categorieId: 'Bio'
+      },
+      {
+        nom: 'Eau Minérale 1.5L',
+        description: 'Eau minérale naturelle',
+        prix_unitaire: 0.80,
+        tva: 5.5,
+        colisage: 6,
+        uniteId: 'Litre',
+        categorieId: 'Boissons'
+      },
+      {
+        nom: 'Yaourt Nature',
+        description: 'Yaourt nature bio',
+        prix_unitaire: 0.95,
+        tva: 5.5,
+        colisage: 4,
+        uniteId: 'Pièce',
+        categorieId: 'Crèmerie'
+      }
+    ];
+
+    const createdProducts: Produit[] = [];
+    for (const product of testProducts) {
+      try {
+        const created = await this.createProduit(product) ;
+        createdProducts.push(created);
+      } catch (error) {
+        console.log(`Erreur lors de la création du produit ${product.nom}:`, error.message);
+      }
+    }
+
+    return createdProducts;
   }
 }

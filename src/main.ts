@@ -8,38 +8,27 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-
-  // Enhanced CORS configuration
+  // ✅ CORS uniquement avec enableCors
   app.enableCors({
-    origin: true,
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204
   });
 
-  // Explicit OPTIONS handler middleware
-  app.use((req, res, next) => {
-    if (req.method === 'OPTIONS') {
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      res.status(204).end();
-      return;
-    }
-    next();
-  });
+  // ✅ Pipes de validation
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    })
+  );
 
-  // ✅ Activer validation des DTOs
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-  }));
-
-  // ✅ Servir les fichiers statiques (uploads)
+  // ✅ Fichiers statiques pour les images de produits
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
-  // ✅ Swagger configuration avec Auth Bearer
+  // ✅ Swagger
   const config = new DocumentBuilder()
     .setTitle('API Backend Commercial')
     .setDescription("Documentation de l’API pour la gestion des commerciaux")
@@ -50,9 +39,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
- await app.listen(4000, '0.0.0.0');
-
-  console.log('🚀 Swagger est disponible sur http://localhost:4000/api');
+  await app.listen(4000, '0.0.0.0');
+  console.log('🚀 Swagger disponible sur http://localhost:4000/api');
 }
 
 bootstrap();

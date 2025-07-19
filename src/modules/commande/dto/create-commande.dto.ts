@@ -1,5 +1,5 @@
 // 📁 create-commande.dto.ts
-import { IsString, IsArray, ValidateNested, IsNumber } from 'class-validator';
+import { IsString, IsArray, ValidateNested, IsNumber, IsOptional, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class LigneCommandeDto {
@@ -21,4 +21,8 @@ export class CreateCommandeDto {
   @ValidateNested({ each: true })
   @Type(() => LigneCommandeDto)
   lignesCommande: LigneCommandeDto[];
+    @IsOptional()
+  @IsInt()
+  promotionId?: number;
 }
+

@@ -16,32 +16,52 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private mailerService: MailerService, // ✅ injection du Mailer
+    private mailerService: MailerService,
   ) {}
 
-  private resetTokens: Map<string, string> = new Map(); // token -> email
+  // 💾 Tokens temporaires de réinitialisation (stockés en mémoire)
+  private resetTokens: Map<string, string> = new Map();
 
+  // ✅ Connexion avec vérification du statut actif
   async login(loginUserDto: LoginUserDto) {
-    const user = await this.usersService.findByEmail(loginUserDto.email);
+    const { email, password } = loginUserDto;
 
-    if (!user) {
-      throw new UnauthorizedException('Utilisateur non trouvé');
+    const user = await this.usersService.findByEmail(email);
+
+    // ❌ Ne pas révéler si l'utilisateur existe ou non
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
-    const passwordMatch = await bcrypt.compare(loginUserDto.password, user.password);
-    if (!passwordMatch) {
-      throw new UnauthorizedException('Mot de passe incorrect');
+    // ❌ Vérifie que le compte est actif
+    if (!user.isActive) {
+      throw new UnauthorizedException('Votre compte est désactivé. Veuillez contacter un administrateur.');
     }
 
-    const payload = { id: user.id, email: user.email, role: user.role };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
     const token = this.jwtService.sign(payload);
 
-    return { access_token: token, user };
+    return {
+      access_token: token,
+      user,
+    };
   }
 
+  // ✅ Envoi du lien de réinitialisation de mot de passe
   async forgotPassword(email: string) {
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      throw new BadRequestException('Adresse email invalide');
+    }
+
     const user = await this.usersService.findByEmail(email);
-    if (!user) throw new NotFoundException('Utilisateur introuvable');
+    if (!user) {
+      throw new NotFoundException('Aucun utilisateur associé à cet email.');
+    }
 
     const token = uuidv4();
     this.resetTokens.set(token, email);
@@ -65,8 +85,10 @@ export class AuthService {
     };
   }
 
+  // ✅ Réinitialisation avec token
   async resetPassword(token: string, newPassword: string) {
     const email = this.resetTokens.get(token);
+
     if (!email) {
       throw new BadRequestException('Token invalide ou expiré');
     }
@@ -81,6 +103,8 @@ export class AuthService {
 
     this.resetTokens.delete(token);
 
-    return { message: 'Mot de passe réinitialisé avec succès' };
+    return {
+      message: 'Mot de passe réinitialisé avec succès',
+    };
   }
 }

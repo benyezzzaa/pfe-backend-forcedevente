@@ -25,20 +25,30 @@ import { PromotionService } from './Promotion.Service';
   @UseGuards(JwtAuthGuard, RolesGuard)
   export class PromotionController {
     constructor(private readonly promoService: PromotionService) {}
-  
+    // ✅ Dans PromotionController
+
     @Post()
     @SetRoles('admin')
     create(@Body() dto: CreatePromotionDto) {
       return this.promoService.create(dto);
     }
-  
+@Get('commercial/actives')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@SetRoles('commercial')
+findActivePromotionsForCommercial() {
+  return this.promoService.findActives();
+}
  @Get()
 @SetRoles('admin', 'commercial')
 findAll(@Request() req) {
   console.log('👤 Role:', req.user.role); // ➕ debug
   return this.promoService.findAll(); // temporairement sans filtrage
 }
-  
+   @Get('actives')
+  @SetRoles('admin', 'commercial')
+  getActives() {
+    return this.promoService.getPromotionsActives();
+  }
     @Put()
     @SetRoles('admin')
     updateFromBody(@Body() dto: CreatePromotionDto & { id: number }) {

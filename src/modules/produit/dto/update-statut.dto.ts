@@ -4,4 +4,5 @@ import { IsBoolean } from 'class-validator';
 export class UpdateStatutDto {
   @IsBoolean()
   isActive: boolean;
+  
 }

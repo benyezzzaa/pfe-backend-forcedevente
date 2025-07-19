@@ -21,7 +21,7 @@ export class CreateUserDto {
   @MinLength(6)
   password: string;
 
-  isActive: boolean;
+ 
 
    @ApiProperty({ example: '0612345678', description: 'Numéro français valide' })
   @IsOptional()

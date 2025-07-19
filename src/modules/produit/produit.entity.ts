@@ -22,11 +22,13 @@ export class Produit {
   @Column({ nullable: false })
   description: string;
 
-  @Column({ type: 'double precision', nullable: false })
-  prix: number;
+  
 
-  @Column({ type: 'int', default: 0 })
-  stock: number;
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
+tva: number;
+
+@Column({ type: 'int', default: 1 })
+colisage: number;
 
   @Column('text', { array: true, nullable: true })
   images: string[];
@@ -36,7 +38,8 @@ export class Produit {
 
   @Column()
   categorieId: number;
-
+@Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+prix_unitaire_ttc: number;
   @ManyToOne(() => CategorieProduit, (categorie) => categorie.produits, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'categorieId' })
   categorie: CategorieProduit;

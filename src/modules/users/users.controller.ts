@@ -9,7 +9,8 @@ import {
   Patch,
   Query,
   UseGuards,
-  Put
+  Put,
+  ParseIntPipe
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -60,12 +61,11 @@ export class UsersController {
   }
 
   // ✅ Modifier un utilisateur
-  @Put(':id')
+ @Put(':id')
   @SetRoles('admin')
-  @ApiOperation({ summary: 'Modifier les informations d\'un utilisateur' })
-  updateUser( 
-    @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto
+  async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.updateUser(id, updateUserDto);
   }

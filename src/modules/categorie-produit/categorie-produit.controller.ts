@@ -8,9 +8,7 @@ import { SetRoles } from '../auth/setRoles.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Catégories')
-@ApiBearerAuth()
 @Controller('categories')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class CategorieProduitController {
   constructor(private readonly service: CategorieProduitService) {}
 
@@ -21,7 +19,6 @@ export class CategorieProduitController {
   }
 
   @Get()
-  @SetRoles('admin', 'commercial')
   getAll() {
     return this.service.getAll();
   }
@@ -34,7 +31,7 @@ export class CategorieProduitController {
 
   @Put(':id')
   @SetRoles('admin')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateCategorieDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: Partial<CreateCategorieDto>) {
     return this.service.update(id, dto);
   }
 

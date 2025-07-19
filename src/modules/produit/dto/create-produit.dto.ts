@@ -11,16 +11,19 @@ export class CreateProduitDto {
   @IsString()
   description: string;
 
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0, { message: 'Le prix doit être supérieur ou égal à 0.' })
-  prix: number;
+  
 
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsNumber()
-  stock: number;
+@IsNotEmpty()
+@Type(() => Number)
+@IsNumber()
+@Min(0)
+tva: number;
+
+@IsNotEmpty()
+@Type(() => Number)
+@IsNumber()
+@Min(1)
+colisage: number;
 
  @IsNotEmpty()
   @Type(() => Number)

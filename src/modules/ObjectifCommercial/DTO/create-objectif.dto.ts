@@ -1,27 +1,39 @@
-import { IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
+// src/modules/ObjectifCommercial/DTO/create-objectif.dto.ts
+import { IsNotEmpty, IsNumber, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateObjectifDto {
-@IsNumber()
-commercialId: number;
+  @IsOptional()
+  commercialId?: number;
 
-@IsDateString()
-dateDebut: string;
+  @IsNumber()
+  montantCible: number;
 
-@IsDateString()
-dateFin: string;
+  @IsNumber()
+  prime: number;
 
-@IsNumber()
-prime: number;
+  @IsOptional()
+  mission?: string;
 
-@IsNumber()
-@IsOptional()
-pourcentageCible?: number;
+  @IsDateString()
+  dateDebut: string;
 
-@IsString()
-@IsOptional()
-categorieProduit?: string;
+  @IsDateString()
+  dateFin: string;
+}
 
-@IsString()
-@IsOptional()
-mission?: string;
+export class CreateObjectifGlobalDto {
+  @IsNumber()
+  montantCible: number;
+
+  @IsNumber()
+  prime: number;
+
+  @IsOptional()
+  mission?: string;
+
+  @IsDateString()
+  dateDebut: string;
+
+  @IsDateString()
+  dateFin: string;
 }

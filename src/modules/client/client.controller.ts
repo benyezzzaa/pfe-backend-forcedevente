@@ -32,6 +32,8 @@ export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
   // ✅ Ajouter un client
+  @UseGuards(JwtAuthGuard, RolesGuard)
+
   @Post()
   @SetRoles('commercial')
   @ApiOperation({ summary: 'Ajouter un client (Commercial uniquement)' })
@@ -55,7 +57,12 @@ async getPlanning(
 
   return this.clientService.getOptimizedPlanning(req.user, parsedLat, parsedLon);
 }
-
+@Get('mes-categories')
+@SetRoles('commercial')
+@ApiOperation({ summary: 'Catégories des clients du commercial connecté' })
+async getMesCategories(@Request() req) {
+  return this.clientService.getCategoriesDuCommercial(req.user);
+}
   // ✅ Voir tous les clients
   @Get()
   @SetRoles('admin', 'commercial')

@@ -19,8 +19,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { SetRoles } from '../auth/setRoles.decorator';
 import { UpdateCommandeDto } from './dto/update-commande.dto';
-import { Not } from 'typeorm';
 import { Response } from 'express';
+
 @ApiTags('Commandes')
 @ApiBearerAuth()
 @Controller('commandes')
@@ -40,70 +40,84 @@ export class CommandeController {
     return this.commandeService.getAllCommandes();
   }
 
-  @Get('validees')
-  @SetRoles('admin', 'commercial')
-  @ApiOperation({ summary: 'Voir uniquement les commandes validées' })
-  async getCommandesValidees() {
-    return this.commandeService.getCommandesValidees();
+  @Get('me')
+  @SetRoles('commercial')
+  async getMyCommandes(@Req() req) {
+    return this.commandeService.findAllByCommercial(req.user.id);
+  }
+
+@Put(':id')
+@SetRoles('admin')
+@ApiOperation({ summary: 'Modifier une commande (admin)' })
+async updateCommande(
+  @Param('id') id: number,
+  @Body() dto: UpdateCommandeDto,
+) {
+  console.log('REÇU:', dto);
+  return this.commandeService.updateCommande(id, dto);
+}
+
+  @Put('valider/:id')
+  @SetRoles('admin')
+  validerCommande(@Param('id') id: number) {
+    return this.commandeService.validerCommande(+id);
+  }
+
+  @Delete(':id')
+  @SetRoles('admin')
+  async deleteCommande(@Param('id') id: number) {
+    return this.commandeService.deleteCommande(id);
   }
 
   @Get('bande/:id')
   @SetRoles('admin', 'commercial')
-  @ApiOperation({ summary: 'Voir une bande de commande spécifique' })
   async getBandeDeCommande(@Param('id') id: number) {
     return this.commandeService.getBandeDeCommande(id);
   }
 
-  @Patch(':id')
-  @SetRoles('admin')
-  @ApiOperation({ summary: 'Modifier une commande (admin)' })
-  async updateCommande(
-    @Param('id') id: number,
-    @Body() updateDto: UpdateCommandeDto,
-  ) {
-    return this.commandeService.updateCommande(id, updateDto);
+  @Get('validees')
+  @SetRoles('admin', 'commercial')
+  async getCommandesValidees() {
+    return this.commandeService.getCommandesValidees();
   }
 
- @Put('valider/:id')
-@SetRoles('admin') // ❗ Bloque les commerciaux
-@ApiOperation({ summary: 'Valider une commande (admin)' })
-validerCommande(@Param('id') id: number) {
-  return this.commandeService.validerCommande(+id);
-}
-@Get('me')
-@UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('pdf/:id')
+  async downloadPdf(@Param('id') id: number, @Res() res: Response) {
+    const pdfBuffer = await this.commandeService.generatePdf(+id);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="commande_${id}.pdf"`,
+    });
+    res.send(pdfBuffer);
+  }
+
+  // ✅ Notifications commerciales
+
+  @Get('modifiees')
+  @SetRoles('commercial')
+  @ApiOperation({ summary: 'Récupérer les commandes modifiées par l\'admin' })
+  async getCommandesModifiees(@Req() req) {
+    return this.commandeService.getCommandesModifieesPourCommercial(req.user.id);
+  }
+
+ @Get('modifiees/details/:id')
 @SetRoles('commercial')
-async getMyCommandes(@Req() req) {
-  const userId = req.user.id;
-  return this.commandeService.findAllByCommercial(userId, { statut: Not('validée') });
-}
-@Get('validees')
-@UseGuards(JwtAuthGuard)
-findCommandesValidees() {
-  return this.commandeService.getCommandesValidees();
+@ApiOperation({ summary: 'Récupérer les détails d\'une commande modifiée' })
+async getDetailsCommandeModifiee(@Param('id') id: number) {
+  return this.commandeService.getDetailsCommandeModifiee(id); // ✅ un seul paramètre attendu
 }
 
-  @Patch('message/:id')
-  @SetRoles('admin')
-  async envoyerMessage(@Param('id') id: number, @Body() body: { message: string }) {
-    // Stockage ou envoi du message (pas encore implémenté)
-  }
-// commandes.controller.ts
-@Get('pdf/:id')
-@UseGuards(JwtAuthGuard)
-
-async downloadPdf(@Param('id') id: number, @Res() res: Response) {
-  const pdfBuffer = await this.commandeService.generatePdf(+id);
-  res.set({
-    'Content-Type': 'application/pdf',
-    'Content-Disposition': `attachment; filename="commande_${id}.pdf"`,
-  });
-  res.send(pdfBuffer);
+ @Put('notifications/:id/vu')
+@SetRoles('commercial')
+@ApiOperation({ summary: 'Marquer une notification comme vue' })
+async marquerNotificationCommeVue(@Param('id') id: number) {
+  return this.commandeService.getNombreNotificationsNonVues(id); // ✅ un seul paramètre attendu
 }
-  @Delete(':id')
-  @SetRoles('admin')
-  @ApiOperation({ summary: 'Supprimer une commande' })
-  async deleteCommande(@Param('id') id: number) {
-    return this.commandeService.deleteCommande(id);
-  }
+@Get('notifications')
+@SetRoles('commercial')
+@ApiOperation({ summary: 'Nombre de notifications non vues pour un commercial' })
+async getNombreNotificationsNonVues(@Req() req) {
+  return this.commandeService.getNombreNotificationsNonVues(req.user.id); // ✅ 1 seul argument
+}
+ 
 }

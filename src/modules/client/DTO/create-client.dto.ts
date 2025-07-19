@@ -45,4 +45,7 @@ codeFiscale?: string;
   @IsOptional()
   @IsBoolean()
   estFidele?: boolean;
+  @IsOptional()
+@IsNumber()
+categorieId?: number; // ID de la catégorie
 }

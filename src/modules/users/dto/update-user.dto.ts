@@ -4,8 +4,7 @@ import { CreateUserDto } from './create-user.dto';
 import { IsBoolean, IsDefined } from 'class-validator';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
-  latitude?: number;
-  longitude?: number;
+  
  /*  @ApiProperty({ example: true })
   @IsDefined({ message: 'Le champ isActive est requis' })
   @IsBoolean({ message: 'Le champ isActive doit être un booléen' })

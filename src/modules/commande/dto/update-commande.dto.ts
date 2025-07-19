@@ -1,4 +1,4 @@
-import { IsOptional, IsNumber, IsArray, ValidateNested } from 'class-validator';
+import { IsOptional, IsNumber, IsArray, ValidateNested, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class UpdateLigneCommandeDto {
@@ -11,9 +11,13 @@ class UpdateLigneCommandeDto {
 }
 
 export class UpdateCommandeDto {
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => UpdateLigneCommandeDto)
-  lignesCommande?: UpdateLigneCommandeDto[];
+   @IsArray()
+  lignesCommande: {
+    id: number;
+    quantite: number;
+  }[];
+
+  @IsInt()
+  modifiePar: number;
 }
+

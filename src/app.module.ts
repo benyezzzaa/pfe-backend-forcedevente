@@ -33,10 +33,12 @@ import { PromotionModule } from './modules/Promotion/promotion.module';
 import { Circuit } from './modules/circuit/circuit.entity';
 import { CircuitModule } from './modules/circuit/circuit.module';
 import { ReclamationModule } from './modules/reclamation/reclamation.module';
-import { SatisfactionModule } from './modules/SatisfactionSurvey/satisfaction.module';
+import { SatisfactionModule } from './modules/SatisfactionSurveyV2/satisfaction.module';
 import { join } from 'path';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { CategorieClient } from './modules/client/categorie-client.entity';
+import { CategorieClientModule } from './modules/client/categorie-client.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -48,7 +50,8 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       database: process.env.DATABASE_NAME || 'postgres',
       autoLoadEntities: true,
       synchronize: true, // ⚠️ Mettre `false` en production et utiliser des migrations
-      entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, Unite,ReglementFacture,RaisonVisiteModule,ObjectifCommercialModule,PromotionModule,CircuitModule], // ✅ Ajout de `Facture` et `Reglement`
+      entities: [Commande, Facture, Reglement,TypeReglement, LigneCommande, User, Client, 
+        Unite,ReglementFacture,RaisonVisiteModule,ObjectifCommercialModule,PromotionModule,CircuitModule,CategorieClient], // ✅ Ajout de `Facture` et `Reglement`
     }),
      // ✅ Mailer configuration (e.g. for password reset)
     MailerModule.forRoot({
@@ -93,6 +96,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     CircuitModule,
     ReclamationModule,
     SatisfactionModule,
+    CategorieClientModule,
 
   ],
   providers: [],

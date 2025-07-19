@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Put, UseGuards } from '@nestjs/common';
 import { LigneCommandeService } from './lignecommande.service';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -30,7 +30,7 @@ export class LigneCommandeController {
       prix_unitaire: ligne.prixUnitaire,
     }));
   }
-@Put(':id')
+@Patch(':id')
 @SetRoles('admin')
 @ApiOperation({ summary: 'Modifier une ligne de commande' })
 @ApiResponse({ status: 200, description: 'Ligne modifiée' })

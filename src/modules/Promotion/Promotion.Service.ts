@@ -10,6 +10,7 @@ export class PromotionService {
   constructor(
     @InjectRepository(Promotion)
     private readonly promoRepo: Repository<Promotion>,
+    
   ) {}
 
   async create(dto: CreatePromotionDto): Promise<Promotion> {
@@ -26,7 +27,12 @@ async findActive(): Promise<Promotion[]> {
     },
   });
 }
-
+async findActives(): Promise<Promotion[]> {
+  return this.promoRepo.find({
+    where: { isActive: true },
+    order: { dateDebut: 'DESC' },
+  });
+}
   async findAll(): Promise<Promotion[]> {
   console.log('⏳ Appel à findAll()');
   const promos = await this.promoRepo.find();
@@ -42,7 +48,17 @@ async findActive(): Promise<Promotion[]> {
     Object.assign(promo, dto);
     return await this.promoRepo.save(promo);
   }
-
+ async getPromotionsActives(): Promise<Promotion[]> {
+    const now = new Date();
+    return this.promoRepo.find({
+      where: {
+        isActive: true,
+        dateDebut: LessThanOrEqual(now),
+        dateFin: MoreThanOrEqual(now),
+      },
+      order: { dateDebut: 'DESC' },
+    });
+  }
   async toggleStatus(id: number): Promise<Promotion> {
     const promo = await this.promoRepo.findOneBy({ id });
     if (!promo) {
