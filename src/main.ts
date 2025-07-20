@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as express from 'express';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
-
+import { json } from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -40,6 +40,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   await app.listen(4000, '0.0.0.0');
+  
   console.log('🚀 Swagger disponible sur http://localhost:4000/api');
 }
 

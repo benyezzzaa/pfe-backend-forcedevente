@@ -24,4 +24,23 @@ export class CategorieClientService {
   async findAll(): Promise<CategorieClient[]> {
     return this.categorieRepo.find();
   }
+
+  async update(id: number, dto: CreateCategorieClientDto) {
+    const cat = await this.categorieRepo.findOneBy({ id });
+    if (!cat) throw new Error('Catégorie non trouvée');
+    cat.nom = dto.nom;
+    return this.categorieRepo.save(cat);
+  }
+
+  async updateStatus(id: number, isActive: boolean) {
+    try {
+      const cat = await this.categorieRepo.findOneBy({ id });
+      if (!cat) throw new Error('Catégorie non trouvée');
+      cat.isActive = isActive;
+      return this.categorieRepo.save(cat);
+    } catch (e) {
+      console.error('Erreur updateStatus:', e);
+      throw e;
+    }
+  }
 }

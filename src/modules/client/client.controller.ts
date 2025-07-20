@@ -63,11 +63,14 @@ async getPlanning(
 async getMesCategories(@Request() req) {
   return this.clientService.getCategoriesDuCommercial(req.user);
 }
-  // ✅ Voir tous les clients
+  // ✅ Voir tous les clients ou filtrer par commercialId
   @Get()
-  @SetRoles('admin', 'commercial')
-  @ApiOperation({ summary: 'Voir tous les clients' })
-  async getAllClients() {
+  @SetRoles('admin')
+  @ApiOperation({ summary: 'Voir tous les clients ou filtrer par commercial' })
+  async getClients(@Query('commercialId') commercialId?: number) {
+    if (commercialId) {
+      return this.clientService.getClientsByCommercialId(commercialId);
+    }
     return this.clientService.getAllClients();
   }
   

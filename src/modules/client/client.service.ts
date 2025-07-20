@@ -30,12 +30,26 @@ export class ClientService {
       throw new ForbiddenException('Seuls les commerciaux peuvent ajouter des clients.');
     }
 
+    let categorie: CategorieClient | null = null;
+    if (dto.categorieId) {
+      categorie = await this.categorieClientRepository.findOneBy({ id: dto.categorieId });
+      if (!categorie) throw new NotFoundException('Catégorie non trouvée');
+    }
+
     const client = this.clientRepository.create({
       ...dto,
       commercial: user,
+      ...(categorie ? { categorie } : {}),
     });
 
-    return this.clientRepository.save(client);
+    const savedClient = await this.clientRepository.save(client);
+
+    const clientWithRelations = await this.clientRepository.findOne({
+      where: { id: savedClient.id },
+      relations: ['categorie', 'commercial'],
+    });
+    if (!clientWithRelations) throw new NotFoundException('Client non trouvé après création');
+    return clientWithRelations;
   }
 
   // ✅ Voir tous les clients
@@ -133,6 +147,14 @@ async getCategoriesDuCommercial(user: User): Promise<CategorieClient[]> {
 
     return this.clientRepository.find({
       where: { commercial: { id: user.id } },
+      relations: ['commercial'],
+    });
+  }
+
+  // ✅ Récupérer les clients d'un commercial (pour l'admin)
+  async getClientsByCommercialId(commercialId: number): Promise<Client[]> {
+    return this.clientRepository.find({
+      where: { commercial: { id: commercialId } },
       relations: ['commercial'],
     });
   }

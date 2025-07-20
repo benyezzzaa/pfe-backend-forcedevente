@@ -34,6 +34,7 @@ import { Circuit } from './modules/circuit/circuit.entity';
 import { CircuitModule } from './modules/circuit/circuit.module';
 import { ReclamationModule } from './modules/reclamation/reclamation.module';
 import { SatisfactionModule } from './modules/SatisfactionSurveyV2/satisfaction.module';
+import { SurveyModule } from './modules/survey/survey.module';
 import { join } from 'path';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -96,6 +97,7 @@ import { CategorieClientModule } from './modules/client/categorie-client.module'
     CircuitModule,
     ReclamationModule,
     SatisfactionModule,
+    SurveyModule,
     CategorieClientModule,
 
   ],

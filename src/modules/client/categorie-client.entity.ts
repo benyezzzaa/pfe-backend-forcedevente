@@ -10,6 +10,9 @@ export class CategorieClient {
   @Column()
   nom: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @OneToMany(() => Client, (client) => client.categorie)
   clients: Client[];
 }
