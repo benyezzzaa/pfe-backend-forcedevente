@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull, MoreThan } from 'typeorm';
 import { ObjectifCommercial } from './objectif-commercial.entity';
 import { User } from '../users/users.entity';
 import { CreateObjectifDto, CreateObjectifGlobalDto } from './DTO/create-objectif.dto';
@@ -207,8 +207,22 @@ export class ObjectifCommercialService {
 
 
   async getObjectifsProgress(userId: number) {
-    const objectifs = await this.objectifRepo.find({
-      where: { commercial: { id: userId }, isActive: true },
+    console.log(`🔍 getObjectifsProgress appelé pour userId: ${userId}`);
+    const today = new Date();
+    // Récupérer UNIQUEMENT les objectifs spécifiques au commercial connecté et non expirés
+    const objectifsCommercial = await this.objectifRepo.find({
+      where: {
+        commercial: { id: userId },
+        isActive: true,
+        dateFin: MoreThan(today),
+      },
+      relations: ['commercial'],
+    });
+    console.log(`📊 Objectifs spécifiques au commercial ${userId} (non expirés): ${objectifsCommercial.length}`);
+    
+    // Log des détails de chaque objectif trouvé
+    objectifsCommercial.forEach((obj, index) => {
+      console.log(`  ${index + 1}. Commercial: ${obj.commercial?.nom} ${obj.commercial?.prenom} - Mission: ${obj.mission}`);
     });
 
     const totalMontant = await this.commandeRepo
@@ -218,8 +232,9 @@ export class ObjectifCommercialService {
       .getRawOne();
 
     const totalVentes = parseFloat(totalMontant?.total || '0');
+    console.log(`💰 Total ventes du commercial ${userId}: ${totalVentes}€`);
 
-    return objectifs.map((obj) => ({
+    const result = objectifsCommercial.map((obj) => ({
       id: obj.id,
       mission: obj.mission,
       dateDebut: obj.dateDebut,
@@ -228,7 +243,15 @@ export class ObjectifCommercialService {
       ventes: totalVentes,
       montantCible: obj.montantCible,
       atteint: obj.montantCible ? totalVentes >= obj.montantCible : false,
+      isGlobal: false, // Toujours false car on ne récupère que les objectifs personnels
     }));
+    
+    console.log(`✅ Retourne ${result.length} objectifs PERSONNELS pour le commercial ${userId}`);
+    result.forEach((obj, index) => {
+      console.log(`  ${index + 1}. [PERSONNEL] ${obj.mission} - Cible: ${obj.montantCible}€`);
+    });
+    
+    return result;
   }
 
   async update(id: number, updateData: Partial<ObjectifCommercial>) {

@@ -63,6 +63,24 @@ async findAll() {
   @Get('me/progress')
   @SetRoles('commercial')
   getMyProgress(@Request() req) {
+    console.log(`🔍 Controller: getMyProgress appelé pour userId: ${req.user.userId}`);
+    console.log(`👤 Commercial connecté: ${req.user.nom} ${req.user.prenom}`);
+    console.log(`🔑 Token: ${req.headers.authorization?.substring(0, 20)}...`);
+    return this.objectifService.getObjectifsProgress(req.user.userId);
+  }
+
+  @Get('debug/all')
+  @SetRoles('commercial')
+  debugAll(@Request() req) {
+    console.log(`🔍 Controller: debugAll appelé pour userId: ${req.user.userId}`);
+    return this.objectifService.findAll();
+  }
+
+  @Get('debug/my-objectifs')
+  @SetRoles('commercial')
+  debugMyObjectifs(@Request() req) {
+    console.log(`🔍 Controller: debugMyObjectifs appelé pour userId: ${req.user.userId}`);
+    console.log(`👤 Commercial connecté: ${req.user.nom} ${req.user.prenom}`);
     return this.objectifService.getObjectifsProgress(req.user.userId);
   }
 
